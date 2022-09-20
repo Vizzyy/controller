@@ -522,7 +522,7 @@ def process_button(button_state):
             if button_position in audio_buttons:
                 handle_audio(button_position)
 
-            if button_position in display_sleep_button:
+            if button_position in launchpad_sleep:
                 handle_launchpad_sleep()
 
     print(f'button_position: {button_position} - push_state: {push_state}')
