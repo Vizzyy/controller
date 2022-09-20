@@ -31,6 +31,7 @@ browser_process = None
 camera_selected = 1
 browser_pid = None
 display_sleep_enabled = True
+launchpad_sleep_enabled = False
 bluetooth_connected = True
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 volume_setting = 3  # current index in above array of preset volumes, 4 = 30%
@@ -317,9 +318,13 @@ def handle_bluetooth(button_position):
 
 
 def handle_launchpad_sleep():
-    global lp
-    lp.Reset()
-    set_led_green(206)
+    global lp, launchpad_sleep_enabled
+    if launchpad_sleep_enabled:
+        set_default_led_states()
+    else:
+        lp.Reset()
+        set_led_green(206)
+    launchpad_sleep_enabled = not launchpad_sleep_enabled
 
 
 def handle_volume(button_position):
