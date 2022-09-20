@@ -38,6 +38,7 @@ volume_setting = 3  # current index in above array of preset volumes, 4 = 30%
 stream_reset_button = [207]  # "mixer" button
 display_sleep_button = [204]  # "session" button
 bluetooth_button = [205]  # "user1" button
+launchpad_sleep = [206]  # "user2" button
 lights_buttons = [0, 1, 2]
 pihole_buttons = [4, 5, 6]
 stream_buttons = [64, 65, 66, 67]
@@ -48,7 +49,7 @@ volume_buttons = [104, 120]
 audio_buttons = [118, 119]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
                   garage_buttons + onvif_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
-                  volume_buttons + audio_buttons
+                  volume_buttons + audio_buttons + launchpad_sleep
 
 
 def print_exception(exception, msg=''):
@@ -201,6 +202,7 @@ def set_default_led_states():
     set_led_red(80)
     set_led_yellow(118)
     set_led_red(119)
+    set_led_yellow(206)
 
 
 def initialize():
@@ -312,6 +314,12 @@ def handle_bluetooth(button_position):
         set_led_green(button_position)
 
     bluetooth_connected = not bluetooth_connected
+
+
+def handle_launchpad_sleep():
+    global lp
+    lp.Reset()
+    set_led_green(206)
 
 
 def handle_volume(button_position):
@@ -513,6 +521,9 @@ def process_button(button_state):
 
             if button_position in audio_buttons:
                 handle_audio(button_position)
+
+            if button_position in display_sleep_button:
+                handle_launchpad_sleep()
 
     print(f'button_position: {button_position} - push_state: {push_state}')
 
