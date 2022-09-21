@@ -534,7 +534,10 @@ def process_button(button_state):
 
 
 initialize()
+midea_refresh_counter = 0
+midea_refresh_limit = 3000  # 5 minutes
 while 1:
+    midea_refresh_counter += 1
     try:
         if but := lp.ButtonStateRaw():
             process_button(but)
@@ -542,6 +545,12 @@ while 1:
         break
     except Exception as e:
         print_exception(e)
+
+    if appliance and midea_refresh_counter > midea_refresh_limit:
+        print(f'Expiring midea token!')
+        appliance = None
+        midea_refresh_counter = 0
+
     time.sleep(WAIT_TIME)  # this is super important, otherwise we destroy the CPU with busy-wait cycles
 
 lp.Reset()  # turn off LEDs
