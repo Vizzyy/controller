@@ -63,7 +63,8 @@ def init_stream_process():
     if browser_process:
         browser_process.kill()
 
-    cmd = f'killall midori; DISPLAY=:0 midori -p -e fullscreen ' \
+    cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
+          f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream'
     print(f'init_stream_process: {cmd}')
 
