@@ -34,7 +34,7 @@ display_sleep_enabled = True
 launchpad_sleep_enabled = False
 bluetooth_connected = True
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-volume_setting = 3  # current index in above array of preset volumes, 4 = 30%
+volume_setting = 4  # current index in above array of preset volumes
 
 stream_reset_button = [207]  # "mixer" button
 display_sleep_button = [204]  # "session" button
