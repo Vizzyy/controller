@@ -143,11 +143,15 @@ def set_display_sleep(enabled):  # enabled is either 0 or 1
 def enable_audio(enabled=True):  # enabled is either 0 or 1
     global camera_selected
 
+    if camera_selected == 1:
+        audio_address = ONVIF_1_HOST
+    elif camera_selected == 2:
+        audio_address = ONVIF_2_HOST
+
     if enabled:
 
         cmd = f'killall ffplay; ' \
-              f'DISPLAY=:0 ffplay ' \
-              f'"rtsp://{ONVIF_1_USER}:{ONVIF_1_PASS}@{NVR_HOST}:554/h264Preview_0{camera_selected}_sub" ' \
+              f'DISPLAY=:0 ffplay "rtsp://{ONVIF_1_USER}:{ONVIF_1_PASS}@{audio_address}:554/h264Preview_01_sub" ' \
               f'-nodisp -fflags nobuffer -flags low_delay -framedrop -strict experimental -rtsp_transport tcp'
     else:
         cmd = f'killall ffplay'
