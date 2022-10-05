@@ -129,7 +129,7 @@ def switch_stream_tab(stream_id):
 
 
 def set_display_sleep(enabled):  # enabled is either 0 or 1
-    cmd = f'DISPLAY=:0 xrandr --output HDMI-2 --brightness {enabled}'
+    cmd = f'DISPLAY=:0 xrandr --output HDMI-1 --brightness {enabled}'
     print(f'set_display_sleep: {cmd}')
 
     process = subprocess.run(f"su - pi -c '{cmd}'",
