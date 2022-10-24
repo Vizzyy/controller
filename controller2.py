@@ -156,7 +156,7 @@ def enable_audio(enabled=True):  # enabled is either 0 or 1
         audio_pass = NVR_PASS
         audio_user = NVR_USER
         audio_address = NVR_HOST
-        audio_channel = f'camera_selected'
+        audio_channel = f'{camera_selected}'
 
     if enabled:
 
