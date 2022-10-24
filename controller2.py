@@ -5,6 +5,7 @@ from config import *
 import subprocess
 import time
 from onvif import ONVIFCamera
+import reo_api
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -286,9 +287,9 @@ def switch_camera(mode, button_position):
         if button_id != button_position:
             set_led_green(button_id)
     for button_id in onvif_buttons:
-        if button_position == 66 or button_position == 67:
-            set_led_yellow(button_id)
-        elif button_id == 80:
+        # if button_position == 66 or button_position == 67:
+        #     set_led_yellow(button_id)
+        if button_id == 80:
             set_led_red(button_id)
         else:
             set_led_green(button_id)
@@ -351,6 +352,34 @@ def handle_volume(button_position):
     set_volume(volume_setting)
 
 
+def handle_ptz_api_req(camera_channel, button_position, push_state):
+    speed = 15
+
+    print(f'handle_ptz_api_req = camera_channel: {camera_channel} - '
+          f'button_position: {button_position} - push_state: {push_state}')
+
+    if button_position == 112:
+        if push_state:              # button pushed down
+            reo_api.ptz_ctrl(camera_channel - 1, 'Left', speed)
+        else:                       # button released
+            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
+    if button_position == 114:
+        if push_state:              # button pushed down
+            reo_api.ptz_ctrl(camera_channel - 1, 'Right', speed)
+        else:                       # button released
+            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
+    if button_position == 97:
+        if push_state:              # button pushed down
+            reo_api.ptz_ctrl(camera_channel - 1, 'Up', speed)
+        else:                       # button released
+            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
+    if button_position == 113:
+        if push_state:              # button pushed down
+            reo_api.ptz_ctrl(camera_channel - 1, 'Down', speed)
+        else:                       # button released
+            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
+
+
 def onvif(button_position, push_state):
     global frontcam_ptz, backcam_ptz, frontcam_token, backcam_token
 
@@ -401,6 +430,10 @@ def onvif(button_position, push_state):
             frontcam_ptz.ContinuousMove(request)
         elif camera_selected == 2:
             backcam_ptz.ContinuousMove(request)
+        elif camera_selected == 3:
+            handle_ptz_api_req(camera_selected, button_position, push_state)
+        elif camera_selected == 4:
+            handle_ptz_api_req(camera_selected, button_position, push_state)
         else:
             print(f'PTZ is not supported with this camera!')
             return
@@ -418,15 +451,21 @@ def onvif(button_position, push_state):
                     'ProfileToken': backcam_token,
                     'PresetToken': backcam_ptz.GetPresets({'ProfileToken': backcam_token})[0].token
                 })
+            # TODO: Impl this with E1 cameras
             set_led_red(80)
         else:  # For all other buttons send stop command as soon as button is released
             if camera_selected == 1:
                 frontcam_ptz.Stop({'ProfileToken': frontcam_token})
             elif camera_selected == 2:
                 backcam_ptz.Stop({'ProfileToken': backcam_token})
+            elif camera_selected == 3:
+                handle_ptz_api_req(camera_selected, button_position, push_state)
+            elif camera_selected == 4:
+                handle_ptz_api_req(camera_selected, button_position, push_state)
             else:
                 frontcam_ptz.Stop({'ProfileToken': frontcam_token})
                 backcam_ptz.Stop({'ProfileToken': backcam_token})
+                # TODO: Impl this with E1 cameras
 
     if button_position != 80:
         set_led_green(button_position)
