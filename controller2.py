@@ -146,6 +146,7 @@ def enable_audio(enabled=True):  # enabled is either 0 or 1
 
     audio_user = ONVIF_1_USER
     audio_pass = ONVIF_1_PASS
+    audio_channel = '1'
 
     if camera_selected == 1:
         audio_address = ONVIF_1_HOST
@@ -155,11 +156,12 @@ def enable_audio(enabled=True):  # enabled is either 0 or 1
         audio_pass = NVR_PASS
         audio_user = NVR_USER
         audio_address = NVR_HOST
+        audio_channel = f'camera_selected'
 
     if enabled:
 
         cmd = f'killall ffplay; ' \
-              f'DISPLAY=:0 ffplay "rtsp://{audio_user}:{audio_pass}@{audio_address}:554/h264Preview_01_sub" ' \
+              f'DISPLAY=:0 ffplay "rtsp://{audio_user}:{audio_pass}@{audio_address}:554/h264Preview_0{audio_channel}_sub" ' \
               f'-nodisp -fflags nobuffer -flags low_delay -framedrop -strict experimental -rtsp_transport tcp'
     else:
         cmd = f'killall ffplay'
@@ -360,7 +362,7 @@ def handle_volume(button_position):
 
 
 def handle_ptz_api_req(camera_channel, button_position, push_state):
-    speed = 15
+    speed = 10
 
     print(f'handle_ptz_api_req = camera_channel: {camera_channel} - '
           f'button_position: {button_position} - push_state: {push_state}')
