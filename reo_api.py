@@ -78,7 +78,7 @@ def ptz_ctrl(channel: int, op: str, speed: int = None, preset_id: int = None):
 # rtsp = f'rtsp://{NVR_USER}:{NVR_PASS}@{NVR_HOST}:554/h264Preview_{rtsp_channel}_sub'
 #
 # PTZ channels start from 0, and go 0,1,2,3...
-ptz_channel = 0
+# ptz_channel = 0
 
 # ptz_ctrl(ptz_channel, 'Left', 30)
 # time.sleep(1)
@@ -88,6 +88,6 @@ ptz_channel = 0
 # time.sleep(1)
 # ptz_ctrl(ptz_channel, 'Stop')
 
-ptz_ctrl(ptz_channel, 'ToPos', 30, 1)
-time.sleep(1)
+# ptz_ctrl(ptz_channel, 'ToPos', 30, 1)
+# time.sleep(1)
 # ptz_ctrl(ptz_channel, 'Stop')
