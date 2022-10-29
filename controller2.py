@@ -4,7 +4,6 @@ import midea_beautiful
 from config import *
 import subprocess
 import time
-from onvif import ONVIFCamera
 import reo_api
 
 # Mk1 Launchpad:
@@ -13,15 +12,6 @@ lp.Open()
 lp.ButtonFlush()
 lp.LedAllOn()
 lp.Reset()  # turn off LEDs
-
-frontcam = None
-frontcam_media = None
-frontcam_token = None
-frontcam_ptz = None
-backcam = None
-backcam_media = None
-backcam_token = None
-backcam_ptz = None
 
 appliance = None
 pihole_enabled = True
@@ -46,11 +36,11 @@ pihole_buttons = [4, 5, 6]
 stream_buttons = [64, 65, 66, 67]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
-onvif_buttons = [80, 97, 99, 112, 113, 114, 115]
+camera_buttons = [80, 97, 99, 112, 113, 114, 115]
 volume_buttons = [104, 120]
 audio_buttons = [118, 119]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
-                  garage_buttons + onvif_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
+                  garage_buttons + camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep
 
 
@@ -94,27 +84,6 @@ def connect_to_bluetooth(connect=True):
                              stderr=subprocess.PIPE,
                              encoding='utf8')
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
-
-
-def init_onvif():
-    global frontcam, frontcam_media, frontcam_token, frontcam_ptz, backcam, backcam_media, backcam_token, backcam_ptz
-    try:
-        frontcam = ONVIFCamera(ONVIF_1_HOST, 8000, ONVIF_1_USER, ONVIF_1_PASS, '/home/pi/wsdl/')
-        frontcam_media = frontcam.create_media_service()
-        frontcam_token = frontcam_media.GetProfiles()[0].token
-        frontcam_ptz = frontcam.create_ptz_service()
-        print(f'External Front Camera initialized')
-    except Exception as ex:
-        print_exception(ex, 'Error initializing Front Camera: ')
-
-    try:
-        backcam = ONVIFCamera(ONVIF_2_HOST, 8000, ONVIF_1_USER, ONVIF_1_PASS, '/home/pi/wsdl/')
-        backcam_media = backcam.create_media_service()
-        backcam_token = backcam_media.GetProfiles()[0].token
-        backcam_ptz = backcam.create_ptz_service()
-        print(f'External Garage Camera initialized')
-    except Exception as ex:
-        print_exception(ex, 'Error initializing Garage Camera: ')
 
 
 def switch_stream_tab(stream_id):
@@ -220,7 +189,6 @@ def set_default_led_states():
 def initialize():
     connect_to_bluetooth()
     init_stream_process()
-    init_onvif()
     set_volume(volume_setting)
     set_default_led_states()
     print(f'Finished initializing!')
@@ -295,7 +263,7 @@ def switch_camera(mode, button_position):
     for button_id in stream_buttons:
         if button_id != button_position:
             set_led_green(button_id)
-    for button_id in onvif_buttons:
+    for button_id in camera_buttons:
         # if button_position == 66 or button_position == 67:
         #     set_led_yellow(button_id)
         if button_id == 80:
@@ -361,123 +329,43 @@ def handle_volume(button_position):
     set_volume(volume_setting)
 
 
-def handle_ptz_api_req(camera_channel, button_position, push_state):
+def handle_ptz_api_req(button_position, push_state):
+    global camera_selected
     speed = 10
 
-    print(f'handle_ptz_api_req = camera_channel: {camera_channel} - '
+    print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
           f'button_position: {button_position} - push_state: {push_state}')
 
-    if button_position == 112:
-        if push_state:              # button pushed down
-            reo_api.ptz_ctrl(camera_channel - 1, 'Left', speed)
+    if button_position == 112:  # pan left
+        if push_state:              # button pushed
+            reo_api.ptz_ctrl(camera_selected - 1, 'Left', speed)
         else:                       # button released
-            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
-    if button_position == 114:
-        if push_state:              # button pushed down
-            reo_api.ptz_ctrl(camera_channel - 1, 'Right', speed)
-        else:                       # button released
-            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
-    if button_position == 97:
-        if push_state:              # button pushed down
-            reo_api.ptz_ctrl(camera_channel - 1, 'Up', speed)
-        else:                       # button released
-            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
-    if button_position == 113:
-        if push_state:              # button pushed down
-            reo_api.ptz_ctrl(camera_channel - 1, 'Down', speed)
-        else:                       # button released
-            reo_api.ptz_ctrl(camera_channel - 1, 'Stop')
-
-
-def onvif(button_position, push_state):
-    global frontcam_ptz, backcam_ptz, frontcam_token, backcam_token
-
-    print(f'onvif = button_position: {button_position} - push_state: {push_state} - camera_selected: {camera_selected}')
-
-    # on button push
-    if push_state:
-        if camera_selected == 1:
-            token = frontcam_token
-        elif camera_selected == 2:
-            token = backcam_token
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+    if button_position == 114:  # pan right
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Right', speed)
         else:
-            token = None
-        request = {
-            'ProfileToken': token,
-            'Velocity': {
-                'PanTilt': {
-                    'x': 0,
-                    'y': 0
-                },
-                'Zoom': {
-                    'x': 0
-                }
-            }
-        }
-
-        # PanTilt
-        if button_position == 112:  # Left
-            request['Velocity']['PanTilt']['x'] = -.1
-            request['Velocity']['PanTilt']['y'] = 0
-        if button_position == 114:  # Right
-            request['Velocity']['PanTilt']['x'] = .1
-            request['Velocity']['PanTilt']['y'] = 0
-        if button_position == 97:  # Up
-            request['Velocity']['PanTilt']['x'] = 0
-            request['Velocity']['PanTilt']['y'] = .1
-        if button_position == 113:  # Down
-            request['Velocity']['PanTilt']['x'] = 0
-            request['Velocity']['PanTilt']['y'] = -.1
-
-        # Zoom
-        if button_position == 99:  # Zoom in
-            request['Velocity']['Zoom']['x'] = .1
-        if button_position == 115:  # Zoom out
-            request['Velocity']['Zoom']['x'] = -.1
-
-        if camera_selected == 1:
-            frontcam_ptz.ContinuousMove(request)
-        elif camera_selected == 2:
-            backcam_ptz.ContinuousMove(request)
-        elif camera_selected == 3:
-            handle_ptz_api_req(camera_selected, button_position, push_state)
-        elif camera_selected == 4:
-            handle_ptz_api_req(camera_selected, button_position, push_state)
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+    if button_position == 97:  # tilt up
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Up', speed)
         else:
-            print(f'PTZ is not supported with this camera!')
-            return
-    # on button release
-    else:
-        # Reset to default position
-        if button_position == 80:
-            if camera_selected == 1:
-                frontcam_ptz.GotoPreset({
-                    'ProfileToken': frontcam_token,
-                    'PresetToken': frontcam_ptz.GetPresets({'ProfileToken': frontcam_token})[0].token
-                })
-            if camera_selected == 2:
-                backcam_ptz.GotoPreset({
-                    'ProfileToken': backcam_token,
-                    'PresetToken': backcam_ptz.GetPresets({'ProfileToken': backcam_token})[0].token
-                })
-            # TODO: Impl this with E1 cameras
-            set_led_red(80)
-        else:  # For all other buttons send stop command as soon as button is released
-            if camera_selected == 1:
-                frontcam_ptz.Stop({'ProfileToken': frontcam_token})
-            elif camera_selected == 2:
-                backcam_ptz.Stop({'ProfileToken': backcam_token})
-            elif camera_selected == 3:
-                handle_ptz_api_req(camera_selected, button_position, push_state)
-            elif camera_selected == 4:
-                handle_ptz_api_req(camera_selected, button_position, push_state)
-            else:
-                frontcam_ptz.Stop({'ProfileToken': frontcam_token})
-                backcam_ptz.Stop({'ProfileToken': backcam_token})
-                # TODO: Impl this with E1 cameras
-
-    if button_position != 80:
-        set_led_green(button_position)
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+    if button_position == 113:  # tilt down
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Down', speed)
+        else:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+    if button_position == 99:  # zoom in
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'ZoomInc', speed)
+        else:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+    if button_position == 115:  # zoom out
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'ZoomDec', speed)
+        else:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
 
 def process_button(button_state):
@@ -490,8 +378,8 @@ def process_button(button_state):
         if push_state:
             set_led_yellow(button_position)
             # Onvif
-            if button_position in onvif_buttons:
-                onvif(button_position, push_state)
+            if button_position in camera_buttons:
+                handle_ptz_api_req(button_position, push_state)
         # on release
         else:
             # Office lights
@@ -556,8 +444,8 @@ def process_button(button_state):
                     garage_request('door', button_position)
 
             # Onvif
-            if button_position in onvif_buttons:
-                onvif(button_position, push_state)
+            if button_position in camera_buttons:
+                handle_ptz_api_req(button_position, push_state)
 
             if button_position in stream_reset_button:
                 init_stream_process()

@@ -40,19 +40,22 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_ptz_ctrl_payload(channel: int, op: str, speed: int = None):
     param = {}
-    if channel:
+    if channel is not None:
         param['channel'] = channel
-    if op:
+    if op is not None:
         param['op'] = op
-    if speed:
+    if speed is not None:
         param['speed'] = speed
 
-    return [
+    payload = [
         {
             "cmd": "PtzCtrl",
             "param": param
         }
     ]
+
+    # print(payload)
+    return payload
 
 
 def ptz_ctrl(channel: int, op: str, speed: int = None):
@@ -73,7 +76,7 @@ def ptz_ctrl(channel: int, op: str, speed: int = None):
 # rtsp = f'rtsp://{NVR_USER}:{NVR_PASS}@{NVR_HOST}:554/h264Preview_{rtsp_channel}_sub'
 #
 # # PTZ channels start from 0, and go 0,1,2,3...
-# ptz_channel = 3
+# ptz_channel = 0
 #
 # ptz_ctrl(ptz_channel, 'Left', 30)
 # time.sleep(1)
@@ -82,3 +85,4 @@ def ptz_ctrl(channel: int, op: str, speed: int = None):
 # ptz_ctrl(ptz_channel, 'Right', 30)
 # time.sleep(1)
 # ptz_ctrl(ptz_channel, 'Stop')
+
