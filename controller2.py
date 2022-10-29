@@ -36,7 +36,14 @@ pihole_buttons = [4, 5, 6]
 stream_buttons = [64, 65, 66, 67]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
-camera_buttons = [80, 97, 99, 112, 113, 114, 115]
+camera_home = 80
+camera_up = 97
+camera_left = 112
+camera_down = 113
+camera_right = 114
+camera_zm_out = 115
+camera_zm_in = 99
+camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left, camera_down, camera_right, camera_zm_out]
 volume_buttons = [104, 120]
 audio_buttons = [118, 119]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
@@ -336,39 +343,54 @@ def handle_ptz_api_req(button_position, push_state):
     print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
           f'button_position: {button_position} - push_state: {push_state}')
 
-    if button_position == 112:  # pan left
-        if push_state:              # button pushed
+    if button_position == camera_left:
+        if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'Left', speed)
-        else:                       # button released
+        else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
-    if button_position == 114:  # pan right
+
+    if button_position == camera_right:
         if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'Right', speed)
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
-    if button_position == 97:  # tilt up
+
+    if button_position == camera_up:
         if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'Up', speed)
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
-    if button_position == 113:  # tilt down
+
+    if button_position == camera_down:
         if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'Down', speed)
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
-    if button_position == 99:  # zoom in
+
+    if button_position == camera_zm_in:
         if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'ZoomInc', speed)
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
-    if button_position == 115:  # zoom out
+
+    if button_position == camera_zm_out:
         if push_state:
             reo_api.ptz_ctrl(camera_selected - 1, 'ZoomDec', speed)
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
+    if button_position == camera_home:
+        home_position_index = 1
+        if push_state:
+            reo_api.ptz_ctrl(camera_selected - 1, 'ToPos', speed, home_position_index)
+        else:
+            pass  # no need to stop when returning to a position
+
     if not push_state:
-        set_led_green(button_position)
+        if button_position == camera_home:
+            set_led_red(button_position)
+        else:
+            set_led_green(button_position)
 
 
 def process_button(button_state):

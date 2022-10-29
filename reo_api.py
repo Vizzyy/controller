@@ -38,7 +38,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 #     return API_TOKEN
 
 
-def get_ptz_ctrl_payload(channel: int, op: str, speed: int = None):
+def get_ptz_ctrl_payload(channel: int, op: str, speed: int = None, preset_id: int = None):
     param = {}
     if channel is not None:
         param['channel'] = channel
@@ -46,6 +46,8 @@ def get_ptz_ctrl_payload(channel: int, op: str, speed: int = None):
         param['op'] = op
     if speed is not None:
         param['speed'] = speed
+    if preset_id is not None:
+        param['id'] = preset_id
 
     payload = [
         {
@@ -58,11 +60,11 @@ def get_ptz_ctrl_payload(channel: int, op: str, speed: int = None):
     return payload
 
 
-def ptz_ctrl(channel: int, op: str, speed: int = None):
+def ptz_ctrl(channel: int, op: str, speed: int = None, preset_id: int = None):
     try:
         response = requests.post(f'https://{NVR_HOST}/api.cgi',
                                  headers={'content-type': 'application/json'},
-                                 json=get_ptz_ctrl_payload(channel, op, speed),
+                                 json=get_ptz_ctrl_payload(channel, op, speed, preset_id),
                                  params={'cmd': 'PtzCtrl', 'username': NVR_USER, 'password': NVR_PASS},
                                  verify=False)
         response_body = response.json()
@@ -75,9 +77,9 @@ def ptz_ctrl(channel: int, op: str, speed: int = None):
 # rtsp_channel = '04'
 # rtsp = f'rtsp://{NVR_USER}:{NVR_PASS}@{NVR_HOST}:554/h264Preview_{rtsp_channel}_sub'
 #
-# # PTZ channels start from 0, and go 0,1,2,3...
-# ptz_channel = 0
-#
+# PTZ channels start from 0, and go 0,1,2,3...
+ptz_channel = 0
+
 # ptz_ctrl(ptz_channel, 'Left', 30)
 # time.sleep(1)
 # ptz_ctrl(ptz_channel, 'Stop')
@@ -86,3 +88,6 @@ def ptz_ctrl(channel: int, op: str, speed: int = None):
 # time.sleep(1)
 # ptz_ctrl(ptz_channel, 'Stop')
 
+ptz_ctrl(ptz_channel, 'ToPos', 30, 1)
+time.sleep(1)
+# ptz_ctrl(ptz_channel, 'Stop')
