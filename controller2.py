@@ -339,57 +339,38 @@ def handle_volume(button_position):
 def handle_ptz_api_req(button_position, push_state):
     global camera_selected
     speed = 10
+    home_position_index = 1
 
     print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
           f'button_position: {button_position} - push_state: {push_state}')
 
-    if button_position == camera_left:
-        if push_state:
+    if push_state:
+        if button_position == camera_left:
             reo_api.ptz_ctrl(camera_selected - 1, 'Left', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_right:
-        if push_state:
+        if button_position == camera_right:
             reo_api.ptz_ctrl(camera_selected - 1, 'Right', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_up:
-        if push_state:
+        if button_position == camera_up:
             reo_api.ptz_ctrl(camera_selected - 1, 'Up', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_down:
-        if push_state:
+        if button_position == camera_down:
             reo_api.ptz_ctrl(camera_selected - 1, 'Down', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_zm_in:
-        if push_state:
+        if button_position == camera_zm_in:
             reo_api.ptz_ctrl(camera_selected - 1, 'ZoomInc', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_zm_out:
-        if push_state:
+        if button_position == camera_zm_out:
             reo_api.ptz_ctrl(camera_selected - 1, 'ZoomDec', speed)
-        else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
-    if button_position == camera_home:
-        home_position_index = 1
-        if push_state:
+        if button_position == camera_home:
             reo_api.ptz_ctrl(camera_selected - 1, 'ToPos', speed, home_position_index)
-        else:
-            pass  # no need to stop when returning to a position
 
-    if not push_state:
+    else:
         if button_position == camera_home:
             set_led_red(button_position)
         else:
+            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
             set_led_green(button_position)
 
 
