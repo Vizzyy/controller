@@ -367,6 +367,9 @@ def handle_ptz_api_req(button_position, push_state):
         else:
             reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
 
+    if not push_state:
+        set_led_green(button_position)
+
 
 def process_button(button_state):
     global midea_target_temp, garage_safety_on, camera_selected
