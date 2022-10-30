@@ -351,8 +351,8 @@ def handle_ptz_api_req(button_position, push_state):
     home_position_index = 1
     api_channel = camera_selected - 1
 
-    print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
-          f'button_position: {button_position} - push_state: {push_state}')
+    # print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
+    #       f'button_position: {button_position} - push_state: {push_state}')
 
     if push_state:
         if button_position == camera_left:
@@ -495,7 +495,7 @@ def process_button(button_state):
             if button_position in launchpad_sleep:
                 handle_launchpad_sleep()
 
-    print(f'button_position: {button_position} - push_state: {push_state}')
+    # print(f'button_position: {button_position} - push_state: {push_state}')
 
 
 initialize()
