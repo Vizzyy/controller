@@ -372,7 +372,7 @@ def handle_ptz_api_req(button_position, push_state):
 
         if button_position == camera_w_led:
             camera_w_led_state = 1 if camera_w_led_state == 0 else 0
-            reo_api.api_ctrl(w_led_state=camera_w_led_state, cmd='SetWhiteLed')
+            reo_api.api_ctrl(channel=api_channel, w_led_state=camera_w_led_state, cmd='SetWhiteLed')
 
     else:
         if button_position == camera_home:
