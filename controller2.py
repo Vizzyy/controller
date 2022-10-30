@@ -200,7 +200,7 @@ def set_default_led_states():
     set_led_red(119)
     set_led_yellow(206)
     set_led_red(camera_w_led)
-    set_led_red(camera_home_reset)
+    set_led_yellow(camera_home_reset)
 
 
 def initialize():
@@ -384,7 +384,7 @@ def handle_ptz_api_req(button_position, push_state):
             reo_api.api_ctrl(channel=api_channel, cmd='SetPtzPreset')
 
     else:
-        if button_position in [camera_home, camera_home_reset]:
+        if button_position in [camera_home]:
             set_led_red(button_position)
         elif button_position == camera_w_led:
             if camera_w_led_state:
