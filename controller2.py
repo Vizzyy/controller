@@ -20,6 +20,7 @@ WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
 camera_selected = 1
+camera_w_led_state = 0
 browser_pid = None
 display_sleep_enabled = True
 launchpad_sleep_enabled = False
@@ -43,7 +44,9 @@ camera_down = 113
 camera_right = 114
 camera_zm_out = 115
 camera_zm_in = 99
-camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left, camera_down, camera_right, camera_zm_out]
+camera_w_led = 82
+camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left,
+                  camera_down, camera_right, camera_zm_out, camera_w_led]
 volume_buttons = [104, 120]
 audio_buttons = [118, 119]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
@@ -191,6 +194,7 @@ def set_default_led_states():
     set_led_yellow(118)
     set_led_red(119)
     set_led_yellow(206)
+    set_led_red(camera_w_led)
 
 
 def initialize():
@@ -263,17 +267,16 @@ def midea_request(button_position, **kwargs):
 
 
 def switch_camera(mode, button_position):
-    global camera_selected
+    global camera_selected, camera_w_led_state
     print(f'switch_camera: {mode} - button_position: {button_position}')
     camera_selected = mode
+    camera_w_led_state = 0  # reset LED state any time we switch
     switch_stream_tab(mode)
     for button_id in stream_buttons:
         if button_id != button_position:
             set_led_green(button_id)
     for button_id in camera_buttons:
-        # if button_position == 66 or button_position == 67:
-        #     set_led_yellow(button_id)
-        if button_id == 80:
+        if button_id in [camera_home, camera_w_led]:
             set_led_red(button_id)
         else:
             set_led_green(button_id)
@@ -337,40 +340,45 @@ def handle_volume(button_position):
 
 
 def handle_ptz_api_req(button_position, push_state):
-    global camera_selected
+    global camera_selected, camera_w_led_state
     speed = 10
     home_position_index = 1
+    api_channel = camera_selected - 1
 
     print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
           f'button_position: {button_position} - push_state: {push_state}')
 
     if push_state:
         if button_position == camera_left:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Left', speed)
+            reo_api.api_ctrl(channel=api_channel, op='Left', speed=speed)
 
         if button_position == camera_right:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Right', speed)
+            reo_api.api_ctrl(channel=api_channel, op='Right', speed=speed)
 
         if button_position == camera_up:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Up', speed)
+            reo_api.api_ctrl(channel=api_channel, op='Up', speed=speed)
 
         if button_position == camera_down:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Down', speed)
+            reo_api.api_ctrl(channel=api_channel, op='Down', speed=speed)
 
         if button_position == camera_zm_in:
-            reo_api.ptz_ctrl(camera_selected - 1, 'ZoomInc', speed)
+            reo_api.api_ctrl(channel=api_channel, op='ZoomInc', speed=speed)
 
         if button_position == camera_zm_out:
-            reo_api.ptz_ctrl(camera_selected - 1, 'ZoomDec', speed)
+            reo_api.api_ctrl(channel=api_channel, op='ZoomDec', speed=speed)
 
         if button_position == camera_home:
-            reo_api.ptz_ctrl(camera_selected - 1, 'ToPos', speed, home_position_index)
+            reo_api.api_ctrl(channel=api_channel, op='ToPos', speed=speed, preset_id=home_position_index)
+
+        if button_position == camera_w_led:
+            camera_w_led_state = 1 if camera_w_led_state == 0 else camera_w_led_state = 0
+            reo_api.api_ctrl(w_led_state=camera_w_led_state, cmd='SetWhiteLed')
 
     else:
         if button_position == camera_home:
             set_led_red(button_position)
         else:
-            reo_api.ptz_ctrl(camera_selected - 1, 'Stop')
+            reo_api.api_ctrl(channel=api_channel, op='Stop')
             set_led_green(button_position)
 
 
