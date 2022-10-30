@@ -34,7 +34,11 @@ bluetooth_button = [205]  # "user1" button
 launchpad_sleep = [206]  # "user2" button
 lights_buttons = [0, 1, 2]
 pihole_buttons = [4, 5, 6]
-stream_buttons = [64, 65, 66, 67]
+stream_1 = 64
+stream_2 = 65
+stream_3 = 66
+stream_4 = 67
+stream_buttons = [stream_1, stream_2, stream_3, stream_4]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
 camera_home = 80
@@ -45,7 +49,8 @@ camera_right = 114
 camera_zm_out = 115
 camera_zm_in = 99
 camera_w_led = 82
-camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left,
+camera_home_reset = 81
+camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left, camera_home_reset,
                   camera_down, camera_right, camera_zm_out, camera_w_led]
 volume_buttons = [104, 120]
 audio_buttons = [118, 119]
@@ -186,7 +191,7 @@ def set_default_led_states():
     set_led_red(5)
     set_led_red(6)
     set_led_red(32)
-    set_led_yellow(64)  # camera 1
+    set_led_yellow(stream_1)  # camera 1
     set_led_red(69)
     set_led_yellow(70)
     set_led_yellow(71)
@@ -195,6 +200,7 @@ def set_default_led_states():
     set_led_red(119)
     set_led_yellow(206)
     set_led_red(camera_w_led)
+    set_led_red(camera_home_reset)
 
 
 def initialize():
@@ -374,8 +380,11 @@ def handle_ptz_api_req(button_position, push_state):
             camera_w_led_state = 1 if camera_w_led_state == 0 else 0
             reo_api.api_ctrl(channel=api_channel, w_led_state=camera_w_led_state, cmd='SetWhiteLed')
 
+        if button_position == camera_home_reset:
+            reo_api.api_ctrl(channel=api_channel, cmd='SetPtzPreset')
+
     else:
-        if button_position == camera_home:
+        if button_position in [camera_home, camera_home_reset]:
             set_led_red(button_position)
         elif button_position == camera_w_led:
             if camera_w_led_state:

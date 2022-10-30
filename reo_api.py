@@ -57,7 +57,8 @@ def api_ctrl(*,
              speed: int = None,
              preset_id: int = None,
              w_led_state: int = None,
-             cmd: str = 'PtzCtrl'
+             cmd: str = 'PtzCtrl',
+
              ):
     global API_TOKEN
 
@@ -75,6 +76,16 @@ def api_ctrl(*,
             'WhiteLed': {
                 'state': w_led_state,
                 'channel': channel
+            }
+        }
+
+    if cmd == 'SetPtzPreset':
+        param = {
+            'PtzPreset': {
+                'channel': channel,
+                'enable': 1,
+                'id': 1,
+                'name': 'Default'
             }
         }
 
@@ -119,7 +130,6 @@ def api_ctrl(*,
 # ptz_channel = 0
 # import time
 
-#
 # api_ctrl(channel=ptz_channel, op='Left', speed=30)
 # time.sleep(1)
 # api_ctrl(channel=ptz_channel, op='Stop')
@@ -135,3 +145,6 @@ def api_ctrl(*,
 # api_ctrl(w_led_state=1, cmd='SetWhiteLed')
 # time.sleep(1)
 # api_ctrl(w_led_state=0, cmd='SetWhiteLed')
+
+# api_ctrl(channel=ptz_channel, cmd='SetPtzPreset')
+
