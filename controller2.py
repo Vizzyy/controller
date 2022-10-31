@@ -284,6 +284,8 @@ def switch_camera(mode, button_position):
     for button_id in camera_buttons:
         if button_id in [camera_home, camera_w_led]:
             set_led_red(button_id)
+        elif button_id in [camera_home_reset]:
+            set_led_yellow(button_id)
         else:
             set_led_green(button_id)
 
