@@ -1,3 +1,5 @@
+import datetime
+
 import requests
 from config import *
 import urllib3
@@ -47,7 +49,8 @@ def get_login_token():
         response_body = response.json()
         API_TOKEN = response_body[0]['value']['Token']['name']
         API_TOKEN_TIMESTAMP = time.time()
-        print(f'get_login_token: {API_TOKEN}, API_TOKEN_TIMESTAMP: {API_TOKEN_TIMESTAMP}')
+        print(f'get_login_token: {API_TOKEN}, '
+              f'API_TOKEN_TIMESTAMP: {datetime.datetime.fromtimestamp(API_TOKEN_TIMESTAMP)}')
     except Exception as e:
         print(f'{type(e).__name__} - {e}')
 
@@ -125,6 +128,14 @@ def api_ctrl(*,
         print(f'{type(e).__name__} - {e}')
 
 
+# start = time.time()
+# print(start)
+# print(datetime.datetime.fromtimestamp(start))
+# time.sleep(5)
+# end = time.time()
+# print(end)
+#
+# print(int(end-start))
 # # RTSP channels start from 01 and go 01,02,03,04...
 # rtsp_channel = '04'
 # rtsp = f'rtsp://{NVR_USER}:{NVR_PASS}@{NVR_HOST}:554/h264Preview_{rtsp_channel}_sub'
