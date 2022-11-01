@@ -1,6 +1,8 @@
 import requests
 from config import *
 import urllib3
+import time
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -18,6 +20,7 @@ LOGIN_REQUEST_PAYLOAD = [
 ]
 
 API_TOKEN = None
+API_TOKEN_TIMESTAMP = time.time()
 
 
 # https://stackoverflow.com/a/39016088/6506539
@@ -34,17 +37,17 @@ def item_generator(json_input, lookup_key):
 
 
 def get_login_token():
-    global API_TOKEN
+    global API_TOKEN, API_TOKEN_TIMESTAMP
     try:
-        if not API_TOKEN:
-            response = requests.post(f'https://{NVR_HOST}/api.cgi',
-                                     headers={'content-type': 'application/json'},
-                                     json=LOGIN_REQUEST_PAYLOAD,
-                                     params={'cmd': 'Login'},
-                                     verify=False)
-            response_body = response.json()
-            API_TOKEN = response_body[0]['value']['Token']['name']
-            print(f'get_login_token: {API_TOKEN}')
+        response = requests.post(f'https://{NVR_HOST}/api.cgi',
+                                 headers={'content-type': 'application/json'},
+                                 json=LOGIN_REQUEST_PAYLOAD,
+                                 params={'cmd': 'Login'},
+                                 verify=False)
+        response_body = response.json()
+        API_TOKEN = response_body[0]['value']['Token']['name']
+        API_TOKEN_TIMESTAMP = time.time()
+        print(f'get_login_token: {API_TOKEN}, API_TOKEN_TIMESTAMP: {API_TOKEN_TIMESTAMP}')
     except Exception as e:
         print(f'{type(e).__name__} - {e}')
 
@@ -60,7 +63,7 @@ def api_ctrl(*,
              cmd: str = 'PtzCtrl',
 
              ):
-    global API_TOKEN
+    global API_TOKEN, API_TOKEN_TIMESTAMP
 
     param = {}
     if channel is not None:
@@ -98,7 +101,7 @@ def api_ctrl(*,
     # print(payload)
 
     try:
-        if not API_TOKEN:
+        if not API_TOKEN or time.time() - API_TOKEN_TIMESTAMP > 3600:
             get_login_token()
 
         response = requests.post(f'https://{NVR_HOST}/api.cgi',
@@ -128,7 +131,6 @@ def api_ctrl(*,
 #
 # PTZ channels start from 0, and go 0,1,2,3...
 # ptz_channel = 0
-# import time
 
 # api_ctrl(channel=ptz_channel, op='Left', speed=30)
 # time.sleep(1)
