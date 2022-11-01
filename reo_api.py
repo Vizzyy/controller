@@ -64,7 +64,6 @@ def api_ctrl(*,
              preset_id: int = None,
              w_led_state: int = None,
              cmd: str = 'PtzCtrl',
-
              ):
     global API_TOKEN, API_TOKEN_TIMESTAMP
 
