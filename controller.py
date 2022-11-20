@@ -59,7 +59,7 @@ def set_led_red(button_position):
 def set_default_led_states():
     global button_mappings
     for button in button_mappings:
-        default_color = button['default_color']
+        default_color = button_mappings[button]['default_color']
         if default_color == "green":
             set_led_green(int(button))
         elif default_color == "yellow":

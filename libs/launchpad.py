@@ -3,7 +3,7 @@
 # A Novation Launchpad control suite for Python.
 #
 # https://github.com/FMMT666/launchpad.py
-# 
+#
 # FMMT666(ASkr) 01/2013..09/2019..08/2020..05/2021
 # www.askrprojects.net
 #
@@ -30,7 +30,7 @@ try:
 	from launchpad_py.charset import *
 except ImportError:
 	try:
-		from charset import *
+		from libs.charset import *
 	except ImportError:
 		sys.exit("error loading Launchpad charset")
 
@@ -42,7 +42,7 @@ except ImportError:
 ##########################################################################################
 class Midi:
 
-	# instance created 
+	# instance created
 	instanceMidi = None
 
 	#---------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ class Midi:
 	#---------------------------------------------------------------------------------------
 	def __getattr__( self, name ):
 		return getattr( self.instanceMidi, name )
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#--
@@ -129,7 +129,7 @@ class Midi:
 	def ReadCheck( self ):
 		return self.devIn.poll()
 
-		
+
 	#-------------------------------------------------------------------------------------
 	#--
 	#-------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ class Midi:
 	def RawWrite( self, stat, dat1, dat2 ):
 		self.devOut.write_short( stat, dat1, dat2 )
 
-		
+
 	#-------------------------------------------------------------------------------------
 	#-- Sends a list of messages. If timestamp is 0, it is ignored.
 	#-- Amount of <dat> bytes is arbitrary.
@@ -153,7 +153,7 @@ class Midi:
 	def RawWriteMulti( self, lstMessages ):
 		self.devOut.write( lstMessages )
 
-	
+
 	#-------------------------------------------------------------------------------------
 	#-- Sends a single system-exclusive message, given by list <lstMessage>
 	#-- The start (0xF0) and end bytes (0xF7) are added automatically.
@@ -188,7 +188,7 @@ class Midi:
 			# but I can't remember why I put this one in here...
 			midi.get_count()
 
-				
+
 		#-------------------------------------------------------------------------------------
 		#-- del
 		#-- This will never be executed, because no one knows, how many Launchpad instances
@@ -205,7 +205,7 @@ class Midi:
 		def SearchDevices( self, name, output = True, input = True, quiet = True ):
 			ret = []
 			i = 0
-			
+
 			for n in range( midi.get_count() ):
 				md = midi.get_device_info( n )
 				if str( md[1].lower() ).find( name.lower() ) >= 0:
@@ -220,14 +220,14 @@ class Midi:
 
 			return ret
 
-			
+
 		#-------------------------------------------------------------------------------------
 		#-- Returns the first device that matches the string 'name'.
 		#-- NEW2015/02: added number argument to pick from several devices (if available)
 		#-------------------------------------------------------------------------------------
 		def SearchDevice( self, name, output = True, input = True, number = 0 ):
 			ret = self.SearchDevices( name, output, input )
-			
+
 			if number < 0 or number >= len( ret ):
 				return None
 
@@ -239,8 +239,8 @@ class Midi:
 		#-------------------------------------------------------------------------------------
 		def GetTime( self ):
 			return midi.time()
-		
-	
+
+
 
 
 ########################################################################################
@@ -263,7 +263,7 @@ class LaunchpadBase( object ):
 #	def __delete__( self ):
 	def __del__( self ):
 		self.Close()
-		
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Opens one of the attached Launchpad MIDI devices.
@@ -271,13 +271,13 @@ class LaunchpadBase( object ):
 	def Open( self, number = 0, name = "Launchpad" ):
 		self.idOut = self.midi.SearchDevice( name, True, False, number = number )
 		self.idIn  = self.midi.SearchDevice( name, False, True, number = number )
-		
+
 		if self.idOut is None or self.idIn is None:
 			return False
 
 		if self.midi.OpenOutput( self.idOut ) == False:
 			return False
-		
+
 		return self.midi.OpenInput( self.idIn )
 
 
@@ -288,10 +288,10 @@ class LaunchpadBase( object ):
 	def Check( self, number = 0, name = "Launchpad" ):
 		self.idOut = self.midi.SearchDevice( name, True, False, number = number )
 		self.idIn  = self.midi.SearchDevice( name, False, True, number = number )
-		
+
 		if self.idOut is None or self.idIn is None:
 			return False
-		
+
 		return True
 
 
@@ -301,7 +301,7 @@ class LaunchpadBase( object ):
 	def Close( self ):
 		self.midi.CloseInput()
 		self.midi.CloseOutput()
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#-- prints a list of all devices to the console (for debug)
@@ -348,10 +348,10 @@ class Launchpad( LaunchpadBase ):
 
 	# LED AND BUTTON NUMBERS IN RAW MODE (DEC):
 	#
-	# +---+---+---+---+---+---+---+---+ 
+	# +---+---+---+---+---+---+---+---+
 	# |200|201|202|203|204|205|206|207| < AUTOMAP BUTTON CODES;
 	# +---+---+---+---+---+---+---+---+   Or use LedCtrlAutomap() for LEDs (alt. args)
-	# 
+	#
 	# +---+---+---+---+---+---+---+---+  +---+
 	# |  0|...|   |   |   |   |   |  7|  |  8|
 	# +---+---+---+---+---+---+---+---+  +---+
@@ -365,19 +365,19 @@ class Launchpad( LaunchpadBase ):
 	# +---+---+---+---+---+---+---+---+  +---+
 	# | 80|...|   |   |   |   |   | 87|  | 88|
 	# +---+---+---+---+---+---+---+---+  +---+
-	# | 96|...|   |   |   |   |   |103|  |104| 
+	# | 96|...|   |   |   |   |   |103|  |104|
 	# +---+---+---+---+---+---+---+---+  +---+
 	# |112|...|   |   |   |   |   |119|  |120|
 	# +---+---+---+---+---+---+---+---+  +---+
-	# 
+	#
 	#
 	# LED AND BUTTON NUMBERS IN XY MODE (X/Y)
 	#
-	#   0   1   2   3   4   5   6   7      8   
-	# +---+---+---+---+---+---+---+---+ 
+	#   0   1   2   3   4   5   6   7      8
+	# +---+---+---+---+---+---+---+---+
 	# |   |1/0|   |   |   |   |   |   |         0
-	# +---+---+---+---+---+---+---+---+ 
-	# 
+	# +---+---+---+---+---+---+---+---+
+	#
 	# +---+---+---+---+---+---+---+---+  +---+
 	# |0/1|   |   |   |   |   |   |   |  |   |  1
 	# +---+---+---+---+---+---+---+---+  +---+
@@ -412,7 +412,7 @@ class Launchpad( LaunchpadBase ):
 	#-------------------------------------------------------------------------------------
 	def LedGetColor( self, red, green ):
 		led = 0
-		
+
 		red = min( int(red), 3 ) # make int and limit to <=3
 		red = max( red, 0 )      # no negative numbers
 
@@ -420,11 +420,11 @@ class Launchpad( LaunchpadBase ):
 		green = max( green, 0 )      # no negative numbers
 
 		led |= red
-		led |= green << 4 
-		
+		led |= green << 4
+
 		return led
 
-		
+
 	#-------------------------------------------------------------------------------------
 	#-- Controls a grid LED by its raw <number>; with <green/red> brightness: 0..3
 	#-- For LED numbers, see grid description on top of class.
@@ -453,7 +453,7 @@ class Launchpad( LaunchpadBase ):
 
 		if y == 0:
 			self.LedCtrlAutomap( x, red, green )
-		
+
 		else:
 			self.LedCtrlRaw( ( (y-1) << 4) | x, red, green )
 
@@ -532,14 +532,14 @@ class Launchpad( LaunchpadBase ):
 		else:
 			self.midi.RawWrite( 176, 0, 127 )
 
-		
+
 	#-------------------------------------------------------------------------------------
 	#-- Sends character <char> in colors <red/green> and lateral offset <offsx> (-8..8)
 	#-- to the Launchpad. <offsy> does not have yet any function
 	#-------------------------------------------------------------------------------------
 	def LedCtrlChar( self, char, red, green, offsx = 0, offsy = 0 ):
 		char = ord( char )
-		
+
 		if char < 0 or char > 255:
 			return
 		char *= 8
@@ -553,7 +553,7 @@ class Launchpad( LaunchpadBase ):
 					else:
 						self.LedCtrlRaw( lednum, 0, 0 )
 			char += 1
-					
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Scroll <text>, in colors specified by <red/green>, as fast as we can.
@@ -593,14 +593,14 @@ class Launchpad( LaunchpadBase ):
 					self.LedCtrlChar(i, red, green)
 					time.wait(waitms)
 
-					
+
 	#-------------------------------------------------------------------------------------
 	#-- Returns True if a button event was received.
 	#-------------------------------------------------------------------------------------
 	def ButtonChanged( self ):
 		return self.midi.ReadCheck()
 
-		
+
 	#-------------------------------------------------------------------------------------
 	#-- Returns the raw value of the last button change as a list:
 	#-- [ <button>, <True/False> ]
@@ -624,12 +624,12 @@ class Launchpad( LaunchpadBase ):
 			if a[0][0][0] == 144:
 				x = a[0][0][1] & 0x0f
 				y = ( a[0][0][1] & 0xf0 ) >> 4
-				
+
 				return [ x, y+1, True if a[0][0][2] > 0 else False ]
-				
+
 			elif a[0][0][0] == 176:
 				return [ a[0][0][1] - 104, 0, True if a[0][0][2] > 0 else False ]
-				
+
 		return []
 
 
@@ -648,10 +648,10 @@ class LaunchpadPro( LaunchpadBase ):
 	# refers to the "PROGRAMMING MODE", which actually does
 	# not react to any of those notes (or numbers).
 	#
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        | 91|   |   |   |   |   |   | 98|
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# | 80|  | 81|   |   |   |   |   |   |   |  | 89|
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -669,19 +669,19 @@ class LaunchpadPro( LaunchpadBase ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# | 10|  |   |   |   |   |   |   |   |   |  | 19|
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
+	#
+	#        +---+---+---+---+---+---+---+---+
 	#        |  1|  2|   |   |   |   |   |  8|
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY CLASSIC MODE (X/Y)
 	#
-	#   9      0   1   2   3   4   5   6   7      8   
-	#        +---+---+---+---+---+---+---+---+ 
+	#   9      0   1   2   3   4   5   6   7      8
+	#        +---+---+---+---+---+---+---+---+
 	#        |0/0|   |2/0|   |   |   |   |   |         0
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |   |  |0/1|   |   |   |   |   |   |   |  |   |  1
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -699,19 +699,19 @@ class LaunchpadPro( LaunchpadBase ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |9/8|  |   |   |   |   |   |   |   |   |  |8/8|  8
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
+	#
+	#        +---+---+---+---+---+---+---+---+
 	#        |   |1/9|   |   |   |   |   |   |         9
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY PRO MODE (X/Y)
 	#
 	#   0      1   2   3   4   5   6   7   8      9
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |1/0|   |3/0|   |   |   |   |   |         0
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |   |  |1/1|   |   |   |   |   |   |   |  |   |  1
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -729,12 +729,12 @@ class LaunchpadPro( LaunchpadBase ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |0/8|  |   |   |   |   |   |   |   |   |  |9/8|  8
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
-	#        |   |2/9|   |   |   |   |   |   |         9
-	#        +---+---+---+---+---+---+---+---+ 
 	#
-	
+	#        +---+---+---+---+---+---+---+---+
+	#        |   |2/9|   |   |   |   |   |   |         9
+	#        +---+---+---+---+---+---+---+---+
+	#
+
 	COLORS = {'black':0, 'off':0, 'white':3, 'red':5, 'green':17 }
 
 	#-------------------------------------------------------------------------------------
@@ -767,7 +767,7 @@ class LaunchpadPro( LaunchpadBase ):
 	#-- Valid options:
 	#--  00 - Session, 01 - Drum Rack, 02 - Chromatic Note, 03 - User (Drum)
 	#--  04 - Audio, 05 -Fader, 06 - Record Arm, 07 - Track Select, 08 - Mute
-	#--  09 - Solo, 0A - Volume 
+	#--  09 - Solo, 0A - Volume
 	#-- Until now, we'll need the "Session" (0x00) settings.
 	#-------------------------------------------------------------------------------------
 	# TODO: ASkr, Undocumented!
@@ -775,7 +775,7 @@ class LaunchpadPro( LaunchpadBase ):
 	def LedSetLayout( self, mode ):
 		if mode < 0 or mode > 0x0d:
 			return
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 16, 34, mode ] )
 		time.wait(10)
 
@@ -788,7 +788,7 @@ class LaunchpadPro( LaunchpadBase ):
 	def LedSetMode( self, mode ):
 		if mode < 0 or mode > 1:
 			return
-			
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 16, 33, mode ] )
 		time.wait(10)
 
@@ -852,11 +852,11 @@ class LaunchpadPro( LaunchpadBase ):
 			green *= 21
 
 		limit = lambda n, mini, maxi: max(min(maxi, n), mini)
-		
+
 		red   = limit( red,   0, 63 )
 		green = limit( green, 0, 63 )
 		blue  = limit( blue,  0, 63 )
-			
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 16, 11, number, red, green, blue ] )
 
 
@@ -927,16 +927,16 @@ class LaunchpadPro( LaunchpadBase ):
 
 		if x < 0 or x > 9 or y < 0 or y > 9:
 			return
-		
+
 		# rotate matrix to the right, column 9 overflows from right to left, same row
 		if mode != "pro":
 			x = ( x + 1 ) % 10
-			
+
 		# swap y
 		led = 90-(10*y) + x
-		
+
 		self.LedCtrlRaw( led, red, green, blue )
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Controls a grid LED by its coordinates <x>, <y> and its <colorcode>.
@@ -949,14 +949,14 @@ class LaunchpadPro( LaunchpadBase ):
 
 		if x < 0 or x > 9 or y < 0 or y > 9:
 			return
-		
+
 		# rotate matrix to the right, column 9 overflows from right to left, same row
 		if mode != "pro":
 			x = ( x + 1 ) % 10
-			
+
 		# swap y
 		led = 90-(10*y) + x
-		
+
 		self.LedCtrlRawByCode( led, colorcode )
 
 
@@ -970,14 +970,14 @@ class LaunchpadPro( LaunchpadBase ):
 
 		if x < 0 or x > 9 or y < 0 or y > 9:
 			return
-		
+
 		# rotate matrix to the right, column 9 overflows from right to left, same row
 		if mode != "pro":
 			x = ( x + 1 ) % 10
-			
+
 		# swap y
 		led = 90-(10*y) + x
-		
+
 		self.LedCtrlPulseByCode( led, colorcode )
 
 
@@ -991,14 +991,14 @@ class LaunchpadPro( LaunchpadBase ):
 
 		if x < 0 or x > 9 or y < 0 or y > 9:
 			return
-		
+
 		# rotate matrix to the right, column 9 overflows from right to left, same row
 		if mode != "pro":
 			x = ( x + 1 ) % 10
-			
+
 		# swap y
 		led = 90-(10*y) + x
-		
+
 		self.LedCtrlFlashByCode( led, colorcode )
 
 
@@ -1018,10 +1018,10 @@ class LaunchpadPro( LaunchpadBase ):
 		# rotate matrix to the right, column 9 overflows from right to left, same row
 		if mode.lower() != "pro":
 			x = ( x + 1 ) % 10
-			
+
 		# swap y
 		led = 90-(10*y) + x
-	
+
 		self.LedCtrlRaw( led, lstColor[0], lstColor[1], lstColor[2] )
 
 
@@ -1070,7 +1070,7 @@ class LaunchpadPro( LaunchpadBase ):
 			red   *= 21
 			green *= 21
 			blue   =  0
-			
+
 		limit = lambda n, mini, maxi: max(min(maxi, n), mini)
 
 		if direction == self.SCROLL_LEFT:
@@ -1110,7 +1110,7 @@ class LaunchpadPro( LaunchpadBase ):
 		else:
 			colorcode = min( colorcode, 127 )
 			colorcode = max( colorcode, 0 )
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 16, 14, colorcode ] )
 
 
@@ -1210,13 +1210,13 @@ class LaunchpadPro( LaunchpadBase ):
 						return []
 
 			if a[0][0][0] == 144 or a[0][0][0] == 176:
-			
+
 				if mode.lower() != "pro":
 					x = (a[0][0][1] - 1) % 10
 				else:
 					x = a[0][0][1] % 10
 				y = ( 99 - a[0][0][1] ) // 10
-			
+
 				return [ x, y, a[0][0][2] ]
 			else:
 				if a[0][0][0] == 208:
@@ -1242,10 +1242,10 @@ class LaunchpadMk2( LaunchpadPro ):
 	# refers to the "PROGRAMMING MODE", which actually does
 	# not react to any of those notes (or numbers).
 	#
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |104|   |106|   |   |   |   |111|
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        | 81|   |   |   |   |   |   |   |  | 89|
 	#        +---+---+---+---+---+---+---+---+  +---+
@@ -1263,16 +1263,16 @@ class LaunchpadMk2( LaunchpadPro ):
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        | 11|   |   |   |   |   |   |   |  | 19|
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#       
+	#
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY MODE (X/Y)
 	#
-	#          0   1   2   3   4   5   6   7      8   
-	#        +---+---+---+---+---+---+---+---+ 
+	#          0   1   2   3   4   5   6   7      8
+	#        +---+---+---+---+---+---+---+---+
 	#        |0/0|   |2/0|   |   |   |   |   |         0
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |0/1|   |   |   |   |   |   |   |  |   |  1
 	#        +---+---+---+---+---+---+---+---+  +---+
@@ -1290,7 +1290,7 @@ class LaunchpadMk2( LaunchpadPro ):
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |   |   |   |   |   |   |   |   |  |8/8|  8
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#       
+	#
 
 
 	#-------------------------------------------------------------------------------------
@@ -1322,7 +1322,7 @@ class LaunchpadMk2( LaunchpadPro ):
 		else:
 			colorcode = min( colorcode, 127 )
 			colorcode = max( colorcode, 0 )
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 24, 14, colorcode ] )
 
 
@@ -1348,7 +1348,7 @@ class LaunchpadMk2( LaunchpadPro ):
 	def ButtonStateXY( self ):
 		if self.midi.ReadCheck():
 			a = self.midi.ReadRaw()
-			
+
 			if a[0][0][0] == 144 or a[0][0][0] == 176:
 
 				if a[0][0][1] >= 104:
@@ -1357,7 +1357,7 @@ class LaunchpadMk2( LaunchpadPro ):
 				else:
 					x = ( a[0][0][1] - 1) % 10
 					y = ( 99 - a[0][0][1] ) // 10
-			
+
 				return [ x, y, a[0][0][2] ]
 			else:
 				return []
@@ -1393,7 +1393,7 @@ class LaunchpadMk2( LaunchpadPro ):
 		red   = limit( red,   0, 63 )
 		green = limit( green, 0, 63 )
 		blue  = limit( blue,  0, 63 )
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 16, 11, number, red, green, blue ] )
 
 
@@ -1481,7 +1481,7 @@ class LaunchpadMk2( LaunchpadPro ):
 		else:
 			# swap y
 			led = 91-(10*y) + x
-		
+
 		self.LedCtrlRaw( led, red, green, blue )
 
 
@@ -1526,7 +1526,7 @@ class LaunchpadMk2( LaunchpadPro ):
 		else:
 			# swap y
 			led = 91-(10*y) + x
-		
+
 		self.LedCtrlRawByCode( led, colorcode )
 
 
@@ -1545,7 +1545,7 @@ class LaunchpadMk2( LaunchpadPro ):
 		else:
 			# swap y
 			led = 91-(10*y) + x
-		
+
 		self.LedCtrlPulseByCode( led, colorcode )
 
 
@@ -1564,48 +1564,48 @@ class LaunchpadMk2( LaunchpadPro ):
 		else:
 			# swap y
 			led = 91-(10*y) + x
-		
+
 		self.LedCtrlFlashByCode( led, colorcode )
 
 
 ########################################################################################
 ### CLASS LaunchControlXL
 ###
-### For 2-color Launch Control XL 
+### For 2-color Launch Control XL
 ########################################################################################
 class LaunchControlXL( LaunchpadBase ):
 
 	# LED, BUTTON AND POTENTIOMETER NUMBERS IN RAW MODE (DEC)
-	#         
+	#
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#     | 13| 29| 45| 61| 77| 93|109|125|  |NOP||NOP| 
+	#     | 13| 29| 45| 61| 77| 93|109|125|  |NOP||NOP|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#     | 14| 30| 46| 62| 78| 94|110|126|  |104||105| 
+	#     | 14| 30| 46| 62| 78| 94|110|126|  |104||105|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#     | 15| 31| 47| 63| 79| 95|111|127|  |106||107| 
+	#     | 15| 31| 47| 63| 79| 95|111|127|  |106||107|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#     
+	#
 	#     +---+---+---+---+---+---+---+---+     +---+
-	#     |   |   |   |   |   |   |   |   |     |105| 
+	#     |   |   |   |   |   |   |   |   |     |105|
 	#     |   |   |   |   |   |   |   |   |     +---+
-	#     |   |   |   |   |   |   |   |   |     |106| 
+	#     |   |   |   |   |   |   |   |   |     |106|
 	#     | 77| 78| 79| 80| 81| 82| 83| 84|     +---+
-	#     |   |   |   |   |   |   |   |   |     |107| 
+	#     |   |   |   |   |   |   |   |   |     |107|
 	#     |   |   |   |   |   |   |   |   |     +---+
-	#     |   |   |   |   |   |   |   |   |     |108| 
+	#     |   |   |   |   |   |   |   |   |     |108|
 	#     +---+---+---+---+---+---+---+---+     +---+
-	#     
-	#     +---+---+---+---+---+---+---+---+  
-	#     | 41| 42| 43| 44| 57| 58| 59| 60| 
-	#     +---+---+---+---+---+---+---+---+  
-	#     | 73| 74| 75| 76| 89| 90| 91| 92| 
+	#
+	#     +---+---+---+---+---+---+---+---+
+	#     | 41| 42| 43| 44| 57| 58| 59| 60|
+	#     +---+---+---+---+---+---+---+---+
+	#     | 73| 74| 75| 76| 89| 90| 91| 92|
 	#     +---+---+---+---+---+---+---+---+
 	#
 	#
 	# LED NUMBERS IN X/Y MODE (DEC)
 	#
 	#       0   1   2   3   4   5   6   7      8    9
-	#      
+	#
 	#     +---+---+---+---+---+---+---+---+  +---++---+
 	#  0  |0/1|   |   |   |   |   |   |   |  |NOP||NOP|  0
 	#     +---+---+---+---+---+---+---+---+  +---++---+
@@ -1623,12 +1623,12 @@ class LaunchControlXL( LaunchpadBase ):
 	#     |   |   |   |   |   |   |   |   |     +---+
 	#     |   |   |   |   |   |   |   |   |     |   |    6
 	#     +---+---+---+---+---+---+---+---+     +---+
-	#     
-	#     +---+---+---+---+---+---+---+---+  
+	#
+	#     +---+---+---+---+---+---+---+---+
 	#  4  |   |   |   |   |   |   |   |   |              4(!)
-	#     +---+---+---+---+---+---+---+---+  
+	#     +---+---+---+---+---+---+---+---+
 	#  5  |   |   |   |3/4|   |   |   |   |              5(!)
-	#     +---+---+---+---+---+---+---+---+  
+	#     +---+---+---+---+---+---+---+---+
 	#
 	#
 
@@ -1653,7 +1653,7 @@ class LaunchControlXL( LaunchpadBase ):
 		template = max( template, 1 )       # no negative numbers
 
 		self.UserTemplate = template
-		
+
 		retval = super( LaunchControlXL, self ).Open( number = number, name = name )
 		if retval == True:
 			self.TemplateSet( self.UserTemplate )
@@ -1711,7 +1711,7 @@ class LaunchControlXL( LaunchpadBase ):
 	def LedGetColor( self, red, green ):
 		# TODO: copy and clear bits
 		led = 0
-		
+
 		red = min( int(red), 3 ) # make int and limit to <=3
 		red = max( red, 0 )      # no negative numbers
 
@@ -1719,8 +1719,8 @@ class LaunchControlXL( LaunchpadBase ):
 		green = max( green, 0 )      # no negative numbers
 
 		led |= red
-		led |= green << 4 
-		
+		led |= green << 4
+
 		return led
 
 
@@ -1747,7 +1747,7 @@ class LaunchControlXL( LaunchpadBase ):
 		else:
 			# the "special buttons" only have one color
 			color = self.LedGetColor( 3, 3 )
-			
+
 
 		# TODO: double code ahead ("37 + y"); query "y>2" first, then x...
 
@@ -1811,7 +1811,7 @@ class LaunchControlXL( LaunchpadBase ):
 	def InputStateRaw( self ):
 		if self.midi.ReadCheck():
 			a = self.midi.ReadRaw()
-			
+
 			#--- pressed
 			if    a[0][0][0] == 144:
 				return [ a[0][0][1], True, 127 ]
@@ -1844,30 +1844,30 @@ class LaunchControlXL( LaunchpadBase ):
 class LaunchControl( LaunchControlXL ):
 
 	# LED, BUTTON AND POTENTIOMETER NUMBERS IN RAW MODE (DEC)
-	#         
+	#
 	#       0   1   2   3   4   5   6   7      8    9
-	#      
+	#
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#  0  | 21| 22| 23| 24| 25| 26| 27| 28|  |NOP||NOP| 
+	#  0  | 21| 22| 23| 24| 25| 26| 27| 28|  |NOP||NOP|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#  1  | 41| 42| 43| 44| 45| 46| 47| 48|  |114||115| 
+	#  1  | 41| 42| 43| 44| 45| 46| 47| 48|  |114||115|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#  2  |  9| 10| 11| 12| 25| 26| 27| 28|  |116||117| 
+	#  2  |  9| 10| 11| 12| 25| 26| 27| 28|  |116||117|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
 	#
 	#
 	# LED NUMBERS IN X/Y MODE (DEC)
 	#
 	#       0   1   2   3   4   5   6   7      8    9
-	#      
+	#
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#     | - | - | - | - | - | - | - | - |  |NOP||NOP| 
+	#     | - | - | - | - | - | - | - | - |  |NOP||NOP|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#  1  | - | - | - | - | - | - | - | - |  |8/1||9/1| 
+	#  1  | - | - | - | - | - | - | - | - |  |8/1||9/1|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
 	#     +---+---+---+---+---+---+---+---+  +---++---+
-	#  0  |0/0|   |   |   |   |   |   |7/0|  |8/0||9/0| 
+	#  0  |0/0|   |   |   |   |   |   |7/0|  |8/0||9/0|
 	#     +---+---+---+---+---+---+---+---+  +---++---+
 
 	#-------------------------------------------------------------------------------------
@@ -1884,7 +1884,7 @@ class LaunchControl( LaunchControlXL ):
 		# user or 8..15 for the factory templates).
 		# By default, user template 0 is enabled
 		self.UserTemplate = template
-		
+
 		retval = super( LaunchControl, self ).Open( number = number, name = name )
 		if retval == True:
 			self.TemplateSet( self.UserTemplate )
@@ -1948,7 +1948,7 @@ class LaunchControl( LaunchControlXL ):
 ########################################################################################
 ### CLASS LaunchKey
 ###
-### For 2-color LaunchKey Keyboards 
+### For 2-color LaunchKey Keyboards
 ########################################################################################
 class LaunchKeyMini( LaunchpadBase ):
 
@@ -1956,13 +1956,13 @@ class LaunchKeyMini( LaunchpadBase ):
 	# NOTICE THAT THE OCTAVE BUTTONS SHIFT THE KEYS UP OR DOWN BY 12.
 	#
 	# LAUNCHKEY MINI:
-	# 
+	#
 	#                   +---+---+---+---+---+---+---+---+
 	#                   | 21| 22|...|   |   |   |   | 28|
 	#     +---+---+---+ +---+---+---+---+---+---+---+---+ +---+  +---+
-	#     |106|107|NOP| | 40| 41| 42| 43| 48| 49| 50| 51| |108|  |104| 
+	#     |106|107|NOP| | 40| 41| 42| 43| 48| 49| 50| 51| |108|  |104|
 	#     +---+---+---+ +---+---+---+---+---+---+---+---+ +---+  +---+
-	#     |NOP|NOP|     | 36| 37| 38| 39| 44| 45| 46| 47| |109|  |105| 
+	#     |NOP|NOP|     | 36| 37| 38| 39| 44| 45| 46| 47| |109|  |105|
 	#     +---+---+     +---+---+---+---+---+---+---+---+ +---+  +---+
 	#
 	#     +--+-+-+-+--+--+-+-+-+-+-+--+--+-+-+-+--+--+-+-+-+-+-+--+---+
@@ -1981,7 +1981,7 @@ class LaunchKeyMini( LaunchpadBase ):
 	#    SLIDERS:           41..48
 	#    SLIDER (MASTER):   7
 	#
-	
+
 
 
 	#-------------------------------------------------------------------------------------
@@ -2006,7 +2006,7 @@ class LaunchKeyMini( LaunchpadBase ):
 
 	#-------------------------------------------------------------------------------------
 	#-- Returns the raw value of the last button, key or potentiometer change as a list:
-	#-- potentiometers:   <pot.number>, <value>     , 0          ] 
+	#-- potentiometers:   <pot.number>, <value>     , 0          ]
 	#-- buttons:          <but.number>, <True/False>, <velocity> ]
 	#-- keys:             <but.number>, <True/False>, <velocity> ]
 	#-- If a button does not provide an analog value, 0 or 127 are returned as velocity values.
@@ -2016,13 +2016,13 @@ class LaunchKeyMini( LaunchpadBase ):
 	def InputStateRaw( self ):
 		if self.midi.ReadCheck():
 			a = self.midi.ReadRaw()
-			
+
 			#--- pressed key
 			if    a[0][0][0] == 144:
-				return [ a[0][0][1], True, a[0][0][2] ] 
+				return [ a[0][0][1], True, a[0][0][2] ]
 			#--- released key
 			elif  a[0][0][0] == 128:
-				return [ a[0][0][1], False, 0 ] 
+				return [ a[0][0][1], False, 0 ]
 			#--- pressed button
 			elif  a[0][0][0] == 153:
 				return [ a[0][0][1], True, a[0][0][2] ]
@@ -2076,7 +2076,7 @@ class Dicer( LaunchpadBase ):
 	#     |  #  |  |     |  |  #  |             |  #  |  |     |  |  #  |
 	#     |    #|  |    #|  |     |             |#   #|  |#   #|  |#    |
 	#     +-----+  +-----+  +-----+             +-----+  +-----+  +-----+
-	# 
+	#
 	#     +-----+            +---+               +----+           +-----+
 	#     |#   #|            | +0|               |+120|           |    #|
 	#     |     |            +---+               +----+           |     |
@@ -2088,8 +2088,8 @@ class Dicer( LaunchpadBase ):
 	#     |  #  |  +---+                                  +----+  |  #  |
 	#     |#   #|                                                 |     |
 	#     +-----+                                                 +-----+
-	# 
-	# 
+	#
+	#
 
 
 	#-------------------------------------------------------------------------------------
@@ -2141,7 +2141,7 @@ class Dicer( LaunchpadBase ):
 	def ButtonStateRaw( self ):
 		if self.midi.ReadCheck():
 			a = self.midi.ReadRaw()
-			
+
 			#--- button on master
 			if   a[0][0][0] >= 154 and a[0][0][0] <= 156:
 				butNum = a[0][0][1]
@@ -2185,7 +2185,7 @@ class Dicer( LaunchpadBase ):
 	#-------------------------------------------------------------------------------------
 #	def LedGetColor( self, red, green ):
 #		led = 0
-#		
+#
 #		red = min( int(red), 3 ) # make int and limit to <=3
 #		red = max( red, 0 )      # no negative numbers
 #
@@ -2193,8 +2193,8 @@ class Dicer( LaunchpadBase ):
 #		green = max( green, 0 )      # no negative numbers
 #
 #		led |= red
-#		led |= green << 4 
-#		
+#		led |= green << 4
+#
 #		return led
 
 
@@ -2204,17 +2204,17 @@ class Dicer( LaunchpadBase ):
 	#-- For LED numbers, see grid description on top of class.
 	#-------------------------------------------------------------------------------------
 	def LedCtrlRaw( self, number, hue, intensity ):
-		
+
 		if number < 0 or number > 130:
 			return
-		
+
 		# check if that is a slave device number (>100)
 		if number > 100:
 			number -= 100
 			cmd = 157
 		else:
 			cmd = 154
-			
+
 		# determine the "page", "hot cue", "loop" or "auto loop"
 		page = number // 10
 		if page > 2:
@@ -2224,7 +2224,7 @@ class Dicer( LaunchpadBase ):
 		number = number - ( page * 10 )
 		if number > 10:
 			return
-		
+
 		# limit the hue range
 		hue = min( int(hue), 7 ) # make int and limit to <=7
 		hue = max( hue, 0 )      # no negative numbers
@@ -2232,7 +2232,7 @@ class Dicer( LaunchpadBase ):
 		# limit the intensity
 		intensity = min( int(intensity), 15 ) # make int and limit to <=15
 		intensity = max( intensity, 0 )       # no negative numbers
-		
+
 		self.midi.RawWrite( cmd + page, number + 59, (hue << 4) | intensity )
 
 
@@ -2272,7 +2272,7 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |104|   |106|   |   |   |   |111|  |112|
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#         
+	#
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        | 81|   |   |   |   |   |   |   |  | 89|
 	#        +---+---+---+---+---+---+---+---+  +---+
@@ -2290,16 +2290,16 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        | 11|   |   |   |   |   |   |   |  | 19|
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#       
+	#
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY MODE (X/Y)
 	#
-	#          0   1   2   3   4   5   6   7      8   
+	#          0   1   2   3   4   5   6   7      8
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |0/0|   |2/0|   |   |   |   |   |  |8/0|  0
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#         
+	#
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |0/1|   |   |   |   |   |   |   |  |   |  1
 	#        +---+---+---+---+---+---+---+---+  +---+
@@ -2317,7 +2317,7 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 	#        +---+---+---+---+---+---+---+---+  +---+
 	#        |   |   |   |   |   |   |   |   |  |8/8|  8
 	#        +---+---+---+---+---+---+---+---+  +---+
-	#       
+	#
 
 
 #	COLORS = {'black':0, 'off':0, 'white':3, 'red':5, 'green':17 }
@@ -2358,20 +2358,20 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 		ValidModes = [0x00, 0x04, 0x05, 0x06, 0x0d, 0x7F]
 		if mode not in ValidModes:
 			return
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 13, 0, mode ] )
 		time.wait(10)
 
 
 	#-------------------------------------------------------------------------------------
 	#-- Selects the Mk3's mode.
-	#-- <mode> -> 0 -> "Ableton Live mode"  
+	#-- <mode> -> 0 -> "Ableton Live mode"
 	#--           1 -> "Programmer mode"	(what we need)
 	#-------------------------------------------------------------------------------------
 	def LedSetMode( self, mode ):
 		if mode < 0 or mode > 1:
 			return
-			
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 13, 14, mode ] )
 		time.wait(10)
 
@@ -2403,15 +2403,15 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 			blue   = 0
 			red   *= 21
 			green *= 21
-		
+
 		limit = lambda n, mini, maxi: max(min(maxi, n), mini)
-		
+
 		red   = limit( red,   0, 63 ) << 1
 		green = limit( green, 0, 63 ) << 1
 		blue  = limit( blue,  0, 63 ) << 1
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 13, 3, 3, number, red, green, blue ] )
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Same as LedCtrlRawByCode, but with a pulsing LED.
@@ -2456,7 +2456,7 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 	def LedAllOn( self, colorcode = None ):
 		if colorcode is None:
 			colorcode = LaunchpadPro.COLORS['white']
-		
+
 		colorcode = min(127, max(0, colorcode))
 
 		# TODO: Maybe the SysEx was indeed a better idea :)
@@ -2496,7 +2496,7 @@ class LaunchpadMiniMk3( LaunchpadPro ):
 ### For 3-color "X" Launchpads
 ########################################################################################
 class LaunchpadLPX( LaunchpadPro ):
-	
+
 #	COLORS = {'black':0, 'off':0, 'white':3, 'red':5, 'green':17 }
 
 	#-------------------------------------------------------------------------------------
@@ -2508,13 +2508,13 @@ class LaunchpadLPX( LaunchpadPro ):
 	#--     (b'MMSystem', b'MIDIIN2 (LPX MIDI)', 1, 0, 0)
 	#--     (b'MMSystem', b'LPX MIDI', 0, 1, 0)
 	#--     (b'MMSystem', b'MIDIOUT2 (LPX MIDI)', 0, 1, 0)
-	#--   
+	#--
 	#--   macOS
 	#--     (b'CoreMIDI', b'Launchpad X LPX DAW Out', 1, 0, 0)
 	#--     (b'CoreMIDI', b'Launchpad X LPX MIDI Out', 1, 0, 0)
 	#--     (b'CoreMIDI', b'Launchpad X LPX DAW In', 0, 1, 0)
 	#--     (b'CoreMIDI', b'Launchpad X LPX MIDI In', 0, 1, 0)
-	#--   
+	#--
 	#--   Linux [tm]
 	#--     ('ALSA', 'Launchpad X MIDI 1', 0, 1, 0)
 	#--     ('ALSA', 'Launchpad X MIDI 1', 1, 0, 0)
@@ -2524,7 +2524,7 @@ class LaunchpadLPX( LaunchpadPro ):
 	#-- So the old strategy of simply looking for "LPX" will not work.
 	#-- Workaround: If the user doesn't request a specific name, we'll just
 	#-- search for "Launchpad X" and "LPX"...
-	
+
 	#-------------------------------------------------------------------------------------
 	# Overrides "LaunchpadPro" method
 	def Open( self, number = 0, name = "AUTO" ):
@@ -2572,20 +2572,20 @@ class LaunchpadLPX( LaunchpadPro ):
 		ValidModes = [0x00, 0x01, 0x04, 0x05, 0x06, 0x07, 0x0d, 0x7F]
 		if mode not in ValidModes:
 			return
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 12, 0, mode ] )
 		time.wait(10)
 
 
 	#-------------------------------------------------------------------------------------
 	#-- Selects the LPX's mode.
-	#-- <mode> -> 0 -> "Ableton Live mode"  
+	#-- <mode> -> 0 -> "Ableton Live mode"
 	#--           1 -> "Programmer mode"	(what we need)
 	#-------------------------------------------------------------------------------------
 	def LedSetMode( self, mode ):
 		if mode < 0 or mode > 1:
 			return
-			
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 12, 14, mode ] )
 		time.wait(10)
 
@@ -2617,15 +2617,15 @@ class LaunchpadLPX( LaunchpadPro ):
 			blue   = 0
 			red   *= 21
 			green *= 21
-		
+
 		limit = lambda n, mini, maxi: max(min(maxi, n), mini)
-		
+
 		red   = limit( red,   0, 63 ) << 1
 		green = limit( green, 0, 63 ) << 1
 		blue  = limit( blue,  0, 63 ) << 1
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 12, 3, 3, number, red, green, blue ] )
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Same as LedCtrlRawByCode, but with a pulsing LED.
@@ -2670,7 +2670,7 @@ class LaunchpadLPX( LaunchpadPro ):
 	def LedAllOn( self, colorcode = None ):
 		if colorcode is None:
 			colorcode = LaunchpadPro.COLORS['white']
-		
+
 		colorcode = min(127, max(0, colorcode))
 
 		# TODO: Maybe the SysEx was indeed a better idea :)
@@ -2709,7 +2709,7 @@ class LaunchpadLPX( LaunchpadPro ):
 	#-- Notice that this is not (directly) compatible with the original ButtonStateRaw()
 	#-- method in the "Classic" Launchpad, which only returned [ <button>, <True/False> ].
 	#-- Compatibility would require checking via "== True" and not "is True".
-	#-- Pressure events are returned if enabled via "returnPressure". 
+	#-- Pressure events are returned if enabled via "returnPressure".
 	#-- Unlike the Launchpad Pro, the X does indeed return the button number AND the
 	#-- pressure value. To provide visibility whether or not a button was pressed or is
 	#-- hold, a value of 255 is added to the button number.
@@ -2769,7 +2769,7 @@ class LaunchpadLPX( LaunchpadPro ):
 						return []
 
 			if a[0][0][0] == 144 or a[0][0][0] == 176 or a[0][0][0] == 160:
-			
+
 				if mode.lower() != "pro":
 					x = (a[0][0][1] - 1) % 10
 				else:
@@ -2794,9 +2794,9 @@ class LaunchpadLPX( LaunchpadPro ):
 ########################################################################################
 class MidiFighter64( LaunchpadBase ):
 
-	#         
+	#
 	# LED AND BUTTON NUMBERS IN RAW MODE
-	#         
+	#
 	#        +---+---+---+---+---+---+---+---+
 	#        | 64|   |   | 67| 96|   |   | 99|
 	#        +---+---+---+---+---+---+---+---+
@@ -2879,7 +2879,7 @@ class MidiFighter64( LaunchpadBase ):
 	#-- Controls a grid LED by its <number> and a <color>.
 	#--  <number> 36..99
 	#--  <color>   0..127 from color table
-	#--  <mode>   18..53  for brightness, toggling and animation 
+	#--  <mode>   18..53  for brightness, toggling and animation
 	#-------------------------------------------------------------------------------------
 	def LedCtrlRaw( self, number, color, mode = None ):
 
@@ -2931,7 +2931,7 @@ class MidiFighter64( LaunchpadBase ):
 			number = 36 + x % 4
 		else:
 			number = 68 + x % 4
-		
+
 		number += (7-y) * 4
 
 		self.midi.RawWrite( 146, number, color )
@@ -3091,7 +3091,7 @@ class MidiFighter64( LaunchpadBase ):
 	#-------------------------------------------------------------------------------------
 	def Reset( self ):
 		# TODO
-		# self.LedAllOn( 0 ) 
+		# self.LedAllOn( 0 )
 		pass
 
 
@@ -3103,54 +3103,54 @@ class MidiFighter64( LaunchpadBase ):
 ########################################################################################
 class MidiFighter3D( MidiFighter64 ):
 
-	#         
+	#
 	# LED AND BUTTON NUMBERS IN RAW MODE
 	#
 	#   Button codes depend on the selected bank,
 	#   the bottom row with the small buttons.
 	#
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         | 39|   |   | 36|              | 55|   |   | 52|      
+	#         +---+---+---+---+              +---+---+---+---+
+	#         | 39|   |   | 36|              | 55|   |   | 52|
 	#   +---+ +---+---+---+---+ +---+  +---+ +---+---+---+---+ +---+
 	#   |   | | 43|   |   | 40| |   |  |   | | 59|   |   | 56| |   |
 	#   |   | +---+---+---+---+ |   |  |   | +---+---+---+---+ |   |
 	#   |   | | 47|   |   | 44| |   |  |   | | 63|   |   | 60| |   |
 	#   +---+ +---+---+---+---+ +---+  +---+ +---+---+---+---+ +---+
-	#         | 51|   |   | 48|              | 67|   |   | 64|      
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         |   |   |   |###|              |   |   |###|   |      
-	#         +---+---+---+---+              +---+---+---+---+      
+	#         | 51|   |   | 48|              | 67|   |   | 64|
+	#         +---+---+---+---+              +---+---+---+---+
+	#         +---+---+---+---+              +---+---+---+---+
+	#         |   |   |   |###|              |   |   |###|   |
+	#         +---+---+---+---+              +---+---+---+---+
 	#
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         | 71|   |   | 68|              | 87|   |   | 84|      
+	#         +---+---+---+---+              +---+---+---+---+
+	#         | 71|   |   | 68|              | 87|   |   | 84|
 	#   +---+ +---+---+---+---+ +---+  +---+ +---+---+---+---+ +---+
 	#   |   | | 75|   |   | 72| |   |  |   | | 91|   |   | 88| |   |
 	#   |   | +---+---+---+---+ |   |  |   | +---+---+---+---+ |   |
 	#   |   | | 79|   |   | 76| |   |  |   | | 95|   |   | 92| |   |
 	#   +---+ +---+---+---+---+ +---+  +---+ +---+---+---+---+ +---+
-	#         | 83|   |   | 80|              | 99|   |   | 96|      
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         +---+---+---+---+              +---+---+---+---+      
-	#         |   |###|   |   |              |###|   |   |   |      
-	#         +---+---+---+---+              +---+---+---+---+      
+	#         | 83|   |   | 80|              | 99|   |   | 96|
+	#         +---+---+---+---+              +---+---+---+---+
+	#         +---+---+---+---+              +---+---+---+---+
+	#         |   |###|   |   |              |###|   |   |   |
+	#         +---+---+---+---+              +---+---+---+---+
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY MODE (X/Y)
 	#
 	#              0   1   2   3
-	#            +---+---+---+---+ 
-	#   0        |   |1/0|   |   | 
+	#            +---+---+---+---+
+	#   0        |   |1/0|   |   |
 	#      +---+ +---+---+---+---+ +---+
 	#   1  |   | |   |   |   |   | |   |
 	#      |   | +---+---+---+---+ |   |
 	#   2  |   | |   |   |   |3/2 | |   |
 	#      +---+ +---+---+---+---+ +---+
-	#   3        |0/3|   |   |   | 
-	#            +---+---+---+---+ 
-	#            +---+---+---+---+ 
-	#            |   |   |   |   | 
-	#            +---+---+---+---+ 
+	#   3        |0/3|   |   |   |
+	#            +---+---+---+---+
+	#            +---+---+---+---+
+	#            |   |   |   |   |
+	#            +---+---+---+---+
 
 
 	#-------------------------------------------------------------------------------------
@@ -3240,7 +3240,7 @@ class LaunchpadProMk3( LaunchpadPro ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# | 90|  | 91|   |   |   |   |   |   | 98|  | 99|
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#         
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# | 80|  | 81|   |   |   |   |   |   |   |  | 89|
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -3258,21 +3258,21 @@ class LaunchpadProMk3( LaunchpadPro ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# | 10|  |   |   |   |   |   |   |   |   |  | 19|
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
+	#
+	#        +---+---+---+---+---+---+---+---+
 	#        |101|102|   |   |   |   |   |108|
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |  1|  2|   |   |   |   |   |  8|
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY CLASSIC MODE (X/Y)
 	#
-	#   9      0   1   2   3   4   5   6   7      8   
-	#        +---+---+---+---+---+---+---+---+ 
+	#   9      0   1   2   3   4   5   6   7      8
+	#        +---+---+---+---+---+---+---+---+
 	#        |0/0|   |2/0|   |   |   |   |   |         0
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |   |  |0/1|   |   |   |   |   |   |   |  |   |  1
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -3290,21 +3290,21 @@ class LaunchpadProMk3( LaunchpadPro ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |9/8|  |   |   |   |   |   |   |   |   |  |8/8|  8
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
+	#
+	#        +---+---+---+---+---+---+---+---+
 	#        |   |1/9|   |   |   |   |   |   |         9
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |/10|   |   |   |   |   |   |   |        10
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#
 	#
 	# LED AND BUTTON NUMBERS IN XY PRO MODE (X/Y)
 	#
 	#   0      1   2   3   4   5   6   7   8      9
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |1/0|   |3/0|   |   |   |   |   |         0
-	#        +---+---+---+---+---+---+---+---+ 
-	#         
+	#        +---+---+---+---+---+---+---+---+
+	#
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |   |  |1/1|   |   |   |   |   |   |   |  |   |  1
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
@@ -3322,14 +3322,14 @@ class LaunchpadProMk3( LaunchpadPro ):
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
 	# |0/8|  |   |   |   |   |   |   |   |   |  |9/8|  8
 	# +---+  +---+---+---+---+---+---+---+---+  +---+
-	#       
-	#        +---+---+---+---+---+---+---+---+ 
+	#
+	#        +---+---+---+---+---+---+---+---+
 	#        |   |2/9|   |   |   |   |   |8/9|         9
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 	#        |   |   |   |   |   |   |   |/10|        10
-	#        +---+---+---+---+---+---+---+---+ 
+	#        +---+---+---+---+---+---+---+---+
 
-	
+
 	#-------------------------------------------------------------------------------------
 	#-- Opens one of the attached Launchpad MIDI devices.
 	#-- Uses search string "ProMK3", by default.
@@ -3355,13 +3355,13 @@ class LaunchpadProMk3( LaunchpadPro ):
 
 	#-------------------------------------------------------------------------------------
 	#-- Selects the ProMk3's mode.
-	#-- <mode> -> 0 -> "Ableton Live mode"  
+	#-- <mode> -> 0 -> "Ableton Live mode"
 	#--           1 -> "Programmer mode"	(what we need)
 	#-------------------------------------------------------------------------------------
 	def LedSetMode( self, mode ):
 		if mode < 0 or mode > 1:
 			return
-			
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 14, 14, mode ] )
 		time.wait(100)
 
@@ -3385,15 +3385,15 @@ class LaunchpadProMk3( LaunchpadPro ):
 			blue   = 0
 			red   *= 21
 			green *= 21
-		
+
 		limit = lambda n, mini, maxi: max(min(maxi, n), mini)
-		
+
 		red   = limit( red,   0, 63 ) << 1
 		green = limit( green, 0, 63 ) << 1
 		blue  = limit( blue,  0, 63 ) << 1
-		
+
 		self.midi.RawWriteSysEx( [ 0, 32, 41, 2, 14, 3, 3, number, red, green, blue ] )
-	
+
 
 	#-------------------------------------------------------------------------------------
 	#-- Same as LedCtrlRawByCode, but with a pulsing LED.
@@ -3438,7 +3438,7 @@ class LaunchpadProMk3( LaunchpadPro ):
 	def LedAllOn( self, colorcode = None ):
 		if colorcode is None:
 			colorcode = LaunchpadPro.COLORS['white']
-		
+
 		colorcode = min(127, max(0, colorcode))
 
 		# TODO: Maybe the SysEx was indeed a better idea :)
@@ -3474,7 +3474,7 @@ class LaunchpadProMk3( LaunchpadPro ):
 						return []
 
 			if a[0][0][0] == 144 or a[0][0][0] == 176:
-			
+
 				if mode.lower() != "pro":
 					x = (a[0][0][1] - 1) % 10
 				else:
@@ -3485,7 +3485,7 @@ class LaunchpadProMk3( LaunchpadPro ):
 					y = 10
 				else:
 					y = ( 99 - a[0][0][1] ) // 10
-			
+
 				return [ x, y, a[0][0][2] ]
 			else:
 				# TOCHK: this should be safe without checking "returnPressure"
