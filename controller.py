@@ -1,9 +1,10 @@
 import time
-from functions.init import *
+
+from functions.init import load_mappings, set_default_led_states, lp, button_mappings, lookup, print_exception, \
+    WAIT_TIME
 
 
 def main():
-    global button_mappings
     load_mappings()
     set_default_led_states()
 
