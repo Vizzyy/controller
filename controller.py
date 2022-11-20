@@ -15,7 +15,7 @@ def main():
         try:
             if but := lp.ButtonStateRaw():
                 button_position = but[0]
-                func = button_mappings[str(button_position)]["function"]
+                func = init.button_mappings[str(button_position)]["function"]
                 print(f'but: {but} - {func}')
                 lookup(f'functions.{func}', func)(button_position)
         except KeyboardInterrupt:
