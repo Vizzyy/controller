@@ -1,19 +1,5 @@
-import libs.launchpad as launchpad
 import time
 from functions.init import *
-
-# Mk1 Launchpad:
-lp = launchpad.Launchpad()
-lp.Open()
-lp.ButtonFlush()
-lp.LedAllOn()
-lp.Reset()  # turn off LEDs
-
-
-def lookup(mod, func):
-    import importlib
-    module = importlib.import_module(mod)
-    return getattr(module, func)
 
 
 def main():

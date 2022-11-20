@@ -1,4 +1,5 @@
 import json
+import libs.launchpad as launchpad
 
 appliance = None
 pihole_enabled = True
@@ -15,6 +16,20 @@ bluetooth_connected = True
 volume_setting = 4
 enabled_buttons = []
 button_mappings = {}
+
+
+# Mk1 Launchpad:
+lp = launchpad.Launchpad()
+lp.Open()
+lp.ButtonFlush()
+lp.LedAllOn()
+lp.Reset()  # turn off LEDs
+
+
+def lookup(mod, func):
+    import importlib
+    module = importlib.import_module(mod)
+    return getattr(module, func)
 
 
 def load_mappings():
