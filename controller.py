@@ -3,6 +3,7 @@ from functions.init import *
 
 
 def main():
+    global button_mappings
     load_mappings()
     set_default_led_states()
 
