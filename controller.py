@@ -1,4 +1,18 @@
+import libs.launchpad as launchpad
+import requests
+import midea_beautiful
+from config import *
+import subprocess
+import time
+import libs.reo_api
 import json
+
+# Mk1 Launchpad:
+lp = launchpad.Launchpad()
+lp.Open()
+lp.ButtonFlush()
+lp.LedAllOn()
+lp.Reset()  # turn off LEDs
 
 appliance = None
 pihole_enabled = True
@@ -14,45 +28,47 @@ launchpad_sleep_enabled = False
 bluetooth_connected = True
 volume_setting = 4
 enabled_buttons = []
-button_mappings = None
+button_mappings = {}
 
 
 def load_mappings():
     global enabled_buttons, button_mappings
-    with open('./button_mappings.json', 'r') as f:
+    with open('data/button_mappings.json', 'r') as f:
         button_mappings = json.loads(f.read())
 
-    for grouping in button_mappings:
-        enabled_buttons += list(button_mappings[grouping].values())
-    enabled_buttons = sorted(enabled_buttons)
+    enabled_buttons = sorted([int(b_id) for b_id in list(button_mappings.keys())])
+    print(f'Enabled buttons: {enabled_buttons}')
+
+
+def set_led_off(button_position):
+    lp.LedCtrlRaw(button_position, 0, 0)
+
+
+def set_led_green(button_position):
+    lp.LedCtrlRaw(button_position, 0, 3)
+
+
+def set_led_yellow(button_position):
+    lp.LedCtrlRaw(button_position, 3, 3)
+
+
+def set_led_red(button_position):
+    lp.LedCtrlRaw(button_position, 3, 0)
+
+
+def set_default_led_states():
+    global button_mappings
+    for button in button_mappings:
+        default_color = button['default_color']
+        if default_color == "green":
+            set_led_green(int(button))
+        elif default_color == "yellow":
+            set_led_yellow(int(button))
+        elif default_color == "red":
+            set_led_red(int(button))
+        else:
+            set_led_off(int(button))
 
 
 load_mappings()
-print(enabled_buttons)
-print(button_mappings)
-
-#
-#
-#
-#
-# def set_default_led_states():
-#     for button in enabled_buttons:
-#         set_led_green(button)
-#
-#     # Custom default states
-#     set_led_red(0)
-#     set_led_red(5)
-#     set_led_red(6)
-#     set_led_red(32)
-#     set_led_yellow(stream_1)  # camera 1
-#     set_led_red(69)
-#     set_led_yellow(70)
-#     set_led_yellow(71)
-#     set_led_red(80)
-#     set_led_yellow(118)
-#     set_led_red(119)
-#     set_led_yellow(206)
-#     set_led_red(camera_w_led)
-#     set_led_yellow(camera_home_reset)
-
-
+set_default_led_states()
