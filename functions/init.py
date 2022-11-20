@@ -15,19 +15,15 @@ bluetooth_connected = True
 volume_setting = 4
 enabled_buttons = []
 button_mappings = {}
-button_reverse_mappings = {}
 
 
 def load_mappings():
-    global enabled_buttons, button_mappings, button_reverse_mappings
+    global enabled_buttons, button_mappings
     with open('data/button_mappings.json', 'r') as f:
         button_mappings = json.loads(f.read())
 
     enabled_buttons = sorted([int(b_id) for b_id in list(button_mappings.keys())])
     print(f'Enabled buttons: {enabled_buttons}')
-
-    for button in enabled_buttons:
-        button_reverse_mappings[button_mappings[button]['id']] = button
 
 
 def set_led_off(button_position):

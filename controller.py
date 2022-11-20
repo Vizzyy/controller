@@ -1,10 +1,5 @@
 import libs.launchpad as launchpad
-import requests
-import midea_beautiful
-from config import *
-import subprocess
 import time
-import libs.reo_api as reo_api
 from functions.init import *
 
 # Mk1 Launchpad:
@@ -15,6 +10,12 @@ lp.LedAllOn()
 lp.Reset()  # turn off LEDs
 
 
+def lookup(mod, func):
+    import importlib
+    module = importlib.import_module(mod)
+    return getattr(module, func)
+
+
 def main():
     load_mappings()
     set_default_led_states()
@@ -22,8 +23,10 @@ def main():
     while True:
         try:
             if but := lp.ButtonStateRaw():
-                # process_button(but)
-                print(but)
+                button_position = but[0]
+                func = button_mappings[str(button_position)]["function"]
+                print(f'but: {but} - {func}')
+                lookup(f'functions.{func}', func)(button_position)
         except KeyboardInterrupt:
             lp.Reset()  # turn off LEDs
             lp.Close()  # close the Launchpad

@@ -38,7 +38,8 @@
     "secondary_color":"yellow",
     "groups":[
       "lights_buttons"
-    ]
+    ],
+    "function": "office_light_request"
   },
   "1":{
     "id":"lights_white",
