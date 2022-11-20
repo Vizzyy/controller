@@ -1,0 +1,95 @@
+{
+  "control_buttons": {
+    "stream_reset": {
+      "id": 207,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    },
+    "display_sleep": {
+      "id": 204,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    },
+    "bluetooth_button": {
+      "id": 205,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    },
+    "launchpad_sleep": {
+      "id": 206,
+      "default_color": "yellow",
+      "secondary_color": "green"
+    }
+  },
+  "lights_buttons": {
+    "lights_off": {
+      "id": 0,
+      "default_color": "red",
+      "secondary_color": "yellow"
+    },
+    "lights_white": {
+      "id": 1,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    },
+    "lights_rainbow": {
+      "id": 2,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    }
+  },
+  "pihole_buttons": {
+    "pihole_on": {
+      "id": 4,
+      "default_color": "green",
+      "secondary_color": "yellow"
+    },
+    "pihole_5_min": {
+      "id": 5,
+      "default_color": "red",
+      "secondary_color": "yellow"
+    },
+    "pihole_60_min": {
+      "id": 6,
+      "default_color": "red",
+      "secondary_color": "yellow"
+    }
+  },
+  "stream_buttons": {
+    "stream_1": 64,
+    "stream_2": 65,
+    "stream_3": 66,
+    "stream_4": 67
+  },
+  "midea_buttons": {
+    "midea_off": 32,
+    "midea_cool": 33,
+    "midea_dehumidify": 34,
+    "midea_temp_down": 36,
+    "midea_temp_up": 37
+  },
+  "garage_buttons": {
+    "garage_safety": 69,
+    "garage_lights": 70,
+    "garage_door": 71
+  },
+  "camera_buttons": {
+    "camera_home": 80,
+    "camera_up": 97,
+    "camera_left": 112,
+    "camera_down": 113,
+    "camera_right": 114,
+    "camera_zm_out": 115,
+    "camera_zm_in": 99,
+    "camera_w_led": 82,
+    "camera_home_reset": 81
+  },
+  "volume_buttons": {
+    "volume_up": 104,
+    "volume_down": 120
+  },
+  "audio_buttons": {
+    "audio_on": 118,
+    "audio_off": 119
+  }
+}
