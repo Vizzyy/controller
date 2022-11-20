@@ -4,8 +4,9 @@ import midea_beautiful
 from config import *
 import subprocess
 import time
-import libs.reo_api
+import libs.reo_api as reo_api
 import json
+from functions.init import *
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -14,61 +15,25 @@ lp.ButtonFlush()
 lp.LedAllOn()
 lp.Reset()  # turn off LEDs
 
-appliance = None
-pihole_enabled = True
-midea_target_temp = 25
-WAIT_TIME = .1
-garage_safety_on = True
-browser_process = None
-camera_selected = 1
-camera_w_led_state = 0
-browser_pid = None
-display_sleep_enabled = True
-launchpad_sleep_enabled = False
-bluetooth_connected = True
-volume_setting = 4
-enabled_buttons = []
-button_mappings = {}
+
+def main():
+    load_mappings()
+    set_default_led_states()
+
+    while True:
+        try:
+            if but := lp.ButtonStateRaw():
+                # process_button(but)
+                print(but)
+        except KeyboardInterrupt:
+            lp.Reset()  # turn off LEDs
+            lp.Close()  # close the Launchpad
+            break
+        except Exception as e:
+            print_exception(e)
+
+        time.sleep(WAIT_TIME)  # reduce busy-waiting
 
 
-def load_mappings():
-    global enabled_buttons, button_mappings
-    with open('data/button_mappings.json', 'r') as f:
-        button_mappings = json.loads(f.read())
-
-    enabled_buttons = sorted([int(b_id) for b_id in list(button_mappings.keys())])
-    print(f'Enabled buttons: {enabled_buttons}')
-
-
-def set_led_off(button_position):
-    lp.LedCtrlRaw(button_position, 0, 0)
-
-
-def set_led_green(button_position):
-    lp.LedCtrlRaw(button_position, 0, 3)
-
-
-def set_led_yellow(button_position):
-    lp.LedCtrlRaw(button_position, 3, 3)
-
-
-def set_led_red(button_position):
-    lp.LedCtrlRaw(button_position, 3, 0)
-
-
-def set_default_led_states():
-    global button_mappings
-    for button in button_mappings:
-        default_color = button_mappings[button]['default_color']
-        if default_color == "green":
-            set_led_green(int(button))
-        elif default_color == "yellow":
-            set_led_yellow(int(button))
-        elif default_color == "red":
-            set_led_red(int(button))
-        else:
-            set_led_off(int(button))
-
-
-load_mappings()
-set_default_led_states()
+if __name__ == "__main__":
+    main()
