@@ -1,5 +1,6 @@
 import time
 
+from functions import init
 from functions.init import load_mappings, set_default_led_states, lp, button_mappings, lookup, print_exception, \
     WAIT_TIME
 
@@ -8,7 +9,7 @@ def main():
     load_mappings()
     set_default_led_states()
 
-    print(button_mappings)
+    print(init.button_mappings)
 
     while True:
         try:
