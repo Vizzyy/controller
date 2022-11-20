@@ -6,6 +6,8 @@ def main():
     load_mappings()
     set_default_led_states()
 
+    print(button_mappings)
+
     while True:
         try:
             if but := lp.ButtonStateRaw():
