@@ -1,3 +1,5 @@
+import json
+
 appliance = None
 pihole_enabled = True
 midea_target_temp = 25

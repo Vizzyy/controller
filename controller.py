@@ -5,7 +5,6 @@ from config import *
 import subprocess
 import time
 import libs.reo_api as reo_api
-import json
 from functions.init import *
 
 # Mk1 Launchpad:
