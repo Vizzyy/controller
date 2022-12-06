@@ -38,7 +38,8 @@ stream_1 = 64
 stream_2 = 65
 stream_3 = 66
 stream_4 = 67
-stream_buttons = [stream_1, stream_2, stream_3, stream_4]
+stream_5 = 68
+stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
 camera_home = 80
@@ -71,7 +72,8 @@ def init_stream_process():
 
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
-          f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream'
+          f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
+          f'{STREAM_BASE}/5/stream'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -452,6 +454,8 @@ def process_button(button_state):
                 switch_camera(3, button_position)
             if button_position == 67:
                 switch_camera(4, button_position)
+            if button_position == 68:
+                switch_camera(5, button_position)
 
             # Garage
             if button_position == 69:
