@@ -506,7 +506,7 @@ def process_button(button_state):
             if button_position in launchpad_sleep:
                 handle_launchpad_sleep()
 
-    # print(f'button_position: {button_position} - push_state: {push_state}')
+    print(f'button_position: {button_position} - push_state: {push_state}')
 
 
 initialize()
