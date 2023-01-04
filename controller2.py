@@ -5,6 +5,7 @@ from config import *
 import subprocess
 import time
 import reo_api
+import rpi_backlight
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -118,15 +119,9 @@ def switch_stream_tab(stream_id):
 
 def set_display_sleep(enabled):  # enabled is either 0 or 1
     enabled_bool = enabled == 1
-    cmd = f'python3 -m "from rpi_backlight import Backlight; backlight = Backlight(); backlight.power = {enabled_bool}"'
-    print(f'set_display_sleep: {cmd}')
-
-    process = subprocess.run(f"su - pi -c '{cmd}'",
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             encoding='utf8')
-    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
+    print(f'set_display_sleep: {enabled_bool}')
+    backlight = rpi_backlight.Backlight()
+    backlight.power = enabled_bool
 
 
 def enable_audio(enabled=True):  # enabled is either 0 or 1
