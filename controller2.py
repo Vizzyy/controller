@@ -39,7 +39,8 @@ stream_2 = 65
 stream_3 = 66
 stream_4 = 67
 stream_5 = 68
-stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5]
+stream_medley = 84
+stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_medley]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
 camera_home = 80
@@ -73,7 +74,7 @@ def init_stream_process():
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream'
+          f'{STREAM_BASE}/5/stream {STREAM_MEDLEY}'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -116,7 +117,8 @@ def switch_stream_tab(stream_id):
 
 
 def set_display_sleep(enabled):  # enabled is either 0 or 1
-    cmd = f'DISPLAY=:0 xrandr --output HDMI-1 --brightness {enabled}'
+    enabled_bool = enabled == 1
+    cmd = f'python3 -m "from rpi_backlight import Backlight; backlight = Backlight(); backlight.power = {enabled_bool}"'
     print(f'set_display_sleep: {cmd}')
 
     process = subprocess.run(f"su - pi -c '{cmd}'",
@@ -456,6 +458,8 @@ def process_button(button_state):
                 switch_camera(4, button_position)
             if button_position == 68:
                 switch_camera(5, button_position)
+            if button_position == stream_medley:
+                switch_camera(6, button_position)
 
             # Garage
             if button_position == 69:
