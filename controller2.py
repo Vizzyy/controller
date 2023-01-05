@@ -472,10 +472,12 @@ def process_button(button_state):
                 if brightness_setting < len(brightness_settings) - 1:
                     brightness_setting += 1
                 set_display_brightness(brightness_setting)
+                set_led_green(brightness_inc)
             if button_position == brightness_dec:
                 if brightness_setting > 0:
                     brightness_setting -= 1
                 set_display_brightness(brightness_setting)
+                set_led_green(brightness_dec)
 
             # Garage
             if button_position == 69:
