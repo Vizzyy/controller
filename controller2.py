@@ -29,6 +29,11 @@ bluetooth_connected = True
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 volume_setting = 4  # current index in above array of preset volumes
 
+backlight = rpi_backlight.Backlight()
+brightness_settings = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+backlight.fade_duration = 0.5
+brightness_setting = 4
+
 stream_reset_button = [207]  # "mixer" button
 display_sleep_button = [204]  # "session" button
 bluetooth_button = [205]  # "user1" button
@@ -41,7 +46,9 @@ stream_3 = 66
 stream_4 = 67
 stream_5 = 68
 stream_medley = 84
-stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_medley]
+brightness_inc = 8
+brightness_dec = 24
+stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_medley, brightness_inc, brightness_dec]
 midea_buttons = [32, 33, 34, 36, 37]
 garage_buttons = [69, 70, 71]
 camera_home = 80
@@ -120,8 +127,12 @@ def switch_stream_tab(stream_id):
 def set_display_sleep(enabled):  # enabled is either 0 or 1
     enabled_bool = enabled == 1
     print(f'set_display_sleep: {enabled_bool}')
-    backlight = rpi_backlight.Backlight()
     backlight.power = enabled_bool
+
+
+def set_display_brightness(brightness_idx):  # position in brightness_settings array
+    print(f'set_display_brightness: {brightness_idx}')
+    backlight.brightness = brightness_settings[brightness_idx]
 
 
 def enable_audio(enabled=True):  # enabled is either 0 or 1
@@ -399,7 +410,7 @@ def handle_ptz_api_req(button_position, push_state):
 
 
 def process_button(button_state):
-    global midea_target_temp, garage_safety_on, camera_selected
+    global midea_target_temp, garage_safety_on, camera_selected, brightness_setting
     button_position = button_state[0]
     push_state = button_state[1]
 
@@ -455,6 +466,16 @@ def process_button(button_state):
                 switch_camera(5, button_position)
             if button_position == stream_medley:
                 switch_camera(6, button_position)
+
+            # Brightness
+            if button_position == brightness_inc:
+                if brightness_setting < len(brightness_settings) - 1:
+                    brightness_setting += 1
+                set_display_brightness(brightness_setting)
+            if button_position == brightness_dec:
+                if brightness_setting > 0:
+                    brightness_setting -= 1
+                set_display_brightness(brightness_setting)
 
             # Garage
             if button_position == 69:
