@@ -39,21 +39,35 @@ stream_reset_button = [207]  # "mixer" button
 display_sleep_button = [204]  # "session" button
 bluetooth_button = [205]  # "user1" button
 launchpad_sleep = [206]  # "user2" button
-lights_buttons = [0, 1, 2]
-pihole_buttons = [4, 5, 6]
+lights_off = 0
+lights_white = 1
+lights_rainbow = 2
+lights_buttons = [lights_off, lights_white, lights_rainbow]
+pihole_on = 4
+pihole_off_5 = 5
+pihole_off_60 = 6
+pihole_buttons = [pihole_on, pihole_off_5, pihole_off_60]
 stream_1 = 64
 stream_2 = 65
 stream_3 = 66
 stream_4 = 67
 stream_5 = 68
-stream_6 = 84
+stream_medley2 = 84
 stream_medley = 101
 brightness_inc = 8
 brightness_dec = 24
-stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_6,
+stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_medley2,
                   stream_medley, brightness_inc, brightness_dec]
-midea_buttons = [32, 33, 34, 36, 37]
-garage_buttons = [69, 70, 71]
+midea_off = 32
+midea_dry = 33
+midea_cool = 34
+midea_temp_up = 36
+midea_temp_down = 37
+midea_buttons = [midea_off, midea_dry, midea_cool, midea_temp_up, midea_temp_down]
+garage_safety = 69
+garage_light = 70
+garage_door = 71
+garage_buttons = [garage_safety, garage_light, garage_door]
 camera_home = 80
 camera_up = 97
 camera_left = 112
@@ -65,8 +79,12 @@ camera_w_led = 82
 camera_home_reset = 81
 camera_buttons = [camera_home, camera_up, camera_zm_in, camera_left, camera_home_reset,
                   camera_down, camera_right, camera_zm_out, camera_w_led]
-volume_buttons = [104, 120]
-audio_buttons = [118, 119]
+volume_up = 104
+volume_down = 120
+volume_buttons = [volume_up, volume_down]
+audio_enable = 118
+audio_disable = 119
+audio_buttons = [audio_enable, audio_disable]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
                   garage_buttons + camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep
@@ -77,7 +95,7 @@ def print_exception(exception, msg=''):
 
 
 def init_stream_process():
-    global browser_process, browser_pid
+    global browser_process, browser_pid, camera_selected
 
     if browser_process:
         browser_process.kill()
@@ -101,6 +119,7 @@ def init_stream_process():
 
         print(f'Switching to default stream: 7')
         time.sleep(3)
+        camera_selected = 7
         switch_stream_tab(7)
     except Exception as ex:
         print_exception(ex, 'Error creating stream browser: ')
@@ -177,13 +196,13 @@ def enable_audio(enabled=True):  # enabled is either 0 or 1
 
 
 def handle_audio(button_position):
-    if button_position == 118:
+    if button_position == audio_enable:
         enable_audio(True)
-        set_led_green(118)
-    if button_position == 119:
+        set_led_green(audio_enable)
+    if button_position == audio_disable:
         enable_audio(False)
-        set_led_yellow(118)
-        set_led_red(119)
+        set_led_yellow(audio_enable)
+        set_led_red(audio_disable)
 
 
 def set_volume(volume_index):
@@ -204,18 +223,18 @@ def set_default_led_states():
         set_led_green(button)
 
     # Custom default states
-    set_led_red(0)
-    set_led_red(5)
-    set_led_red(6)
-    set_led_red(32)
-    set_led_yellow(stream_1)  # camera 1
-    set_led_red(69)
-    set_led_yellow(70)
-    set_led_yellow(71)
-    set_led_red(80)
-    set_led_yellow(118)
-    set_led_red(119)
-    set_led_yellow(206)
+    set_led_red(lights_off) 
+    set_led_red(pihole_off_5)
+    set_led_red(pihole_off_60)
+    set_led_red(midea_off)
+    set_led_yellow(stream_medley)  # stream 7
+    set_led_red(garage_safety)
+    set_led_yellow(garage_light)
+    set_led_yellow(garage_door)
+    set_led_red(camera_home)
+    set_led_yellow(audio_enable)
+    set_led_red(audio_disable)
+    set_led_yellow(launchpad_sleep[0])
     set_led_red(camera_w_led)
     set_led_yellow(camera_home_reset)
 
@@ -337,26 +356,26 @@ def handle_launchpad_sleep():
         set_default_led_states()
     else:
         lp.Reset()
-        set_led_green(206)
+        set_led_green(launchpad_sleep[0])
     launchpad_sleep_enabled = not launchpad_sleep_enabled
 
 
 def handle_volume(button_position):
     global volume_setting
 
-    if button_position == 104:
+    if button_position == volume_up:
         if volume_setting + 1 < len(volume_settings):
             volume_setting += 1
-            set_led_green(104)
-            set_led_green(120)
+            set_led_green(volume_up)
+            set_led_green(volume_down)
         else:  # If we reach a limit, set the button red
             set_led_red(button_position)
             return
-    if button_position == 120:
+    if button_position == volume_down:
         if volume_setting - 1 >= 0:
             volume_setting -= 1
-            set_led_green(104)
-            set_led_green(120)
+            set_led_green(volume_up)
+            set_led_green(volume_down)
         else:  # If we reach a limit, set the button red
             set_led_red(button_position)
             return
@@ -431,23 +450,23 @@ def process_button(button_state):
         # on release
         else:
             # Office lights
-            if button_position == 0:
+            if button_position == lights_off:
                 office_light_request('clear', button_position)
-            if button_position == 1:
+            if button_position == lights_white:
                 office_light_request('white', button_position)
-            if button_position == 2:
+            if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
 
             # Pihole
-            if button_position == 4:
+            if button_position == pihole_on:
                 pihole_request('enable', button_position)
-            if button_position == 5:
+            if button_position == pihole_off_5:
                 pihole_request('disable=300', button_position)
-            if button_position == 6:
+            if button_position == pihole_off_60:
                 pihole_request('disable=3600', button_position)
 
             # Midea
-            if button_position == 32:
+            if button_position == midea_off:
                 midea_request(button_position, running=0)
             if button_position == 33:
                 midea_request(button_position, mode=1, running=1)
@@ -471,7 +490,7 @@ def process_button(button_state):
                 switch_camera(4, button_position)
             if button_position == stream_5:
                 switch_camera(5, button_position)
-            if button_position == stream_6:
+            if button_position == stream_medley2:
                 switch_camera(6, button_position)
             if button_position == stream_medley:
                 switch_camera(7, button_position)
@@ -489,23 +508,23 @@ def process_button(button_state):
                 set_led_green(brightness_dec)
 
             # Garage
-            if button_position == 69:
+            if button_position == garage_safety:
                 if garage_safety_on:
                     print(f'Garage Safety DISARMED!')
                     garage_safety_on = False
-                    set_led_yellow(69)
-                    set_led_green(70)
-                    set_led_green(71)
+                    set_led_yellow(garage_safety)
+                    set_led_green(garage_light)
+                    set_led_green(garage_door)
                 else:
                     print(f'Garage Safety ARMED!')
                     garage_safety_on = True
-                    set_led_red(69)
-                    set_led_yellow(70)
-                    set_led_yellow(71)
-            if button_position == 70:
+                    set_led_red(garage_safety)
+                    set_led_yellow(garage_light)
+                    set_led_yellow(garage_door)
+            if button_position == garage_light:
                 if not garage_safety_on:
                     garage_request('light', button_position)
-            if button_position == 71:
+            if button_position == garage_door:
                 if not garage_safety_on:
                     garage_request('door', button_position)
 
