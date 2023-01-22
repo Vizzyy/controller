@@ -6,6 +6,7 @@ import subprocess
 import time
 import reo_api
 import rpi_backlight
+import schedule
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -20,7 +21,7 @@ midea_target_temp = 25
 WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
-camera_selected = 1
+camera_selected = 7
 camera_w_led_state = 0
 browser_pid = None
 display_sleep_enabled = True
@@ -84,7 +85,7 @@ def init_stream_process():
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_MEDLEY}'
+          f'{STREAM_BASE}/5/stream {STREAM_MEDLEY2} {STREAM_MEDLEY}'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -97,6 +98,9 @@ def init_stream_process():
 
         print(f'browser_pid: {browser_process.pid} - process.stdout: {browser_process.stdout} - '
               f'process.stderr: {browser_process.stderr}')
+
+        print(f'Switching to default stream: 7')
+        switch_stream_tab(7)
     except Exception as ex:
         print_exception(ex, 'Error creating stream browser: ')
 
@@ -532,8 +536,11 @@ def process_button(button_state):
 
 
 initialize()
+# TODO: convert midea refresh using schedule
 midea_refresh_counter = 0
 midea_refresh_limit = 3000  # 5 minutes
+schedule.every().day.at("05:40").do(init_stream_process)
+
 while 1:
     midea_refresh_counter += 1
     try:
@@ -549,6 +556,7 @@ while 1:
         appliance = None
         midea_refresh_counter = 0
 
+    schedule.run_pending()
     time.sleep(WAIT_TIME)  # this is super important, otherwise we destroy the CPU with busy-wait cycles
 
 lp.Reset()  # turn off LEDs
