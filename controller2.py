@@ -1,3 +1,4 @@
+import schedule
 import launchpad
 import requests
 import midea_beautiful
@@ -6,7 +7,6 @@ import subprocess
 import time
 import reo_api
 import rpi_backlight
-import schedule
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -100,6 +100,7 @@ def init_stream_process():
               f'process.stderr: {browser_process.stderr}')
 
         print(f'Switching to default stream: 7')
+        time.sleep(3)
         switch_stream_tab(7)
     except Exception as ex:
         print_exception(ex, 'Error creating stream browser: ')
