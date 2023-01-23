@@ -21,7 +21,8 @@ midea_target_temp = 25
 WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
-camera_selected = 7
+default_stream = 7
+camera_selected = default_stream
 camera_w_led_state = 0
 browser_pid = None
 display_sleep_enabled = True
@@ -104,7 +105,7 @@ def init_stream_process():
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream {STREAM_MEDLEY2} {STREAM_MEDLEY} {STREAM_BASE}/6/stream'
+          f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_MEDLEY2} {STREAM_MEDLEY}'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -118,10 +119,10 @@ def init_stream_process():
         print(f'browser_pid: {browser_process.pid} - process.stdout: {browser_process.stdout} - '
               f'process.stderr: {browser_process.stderr}')
 
-        print(f'Switching to default stream: 7')
+        print(f'Switching to default stream: {default_stream}')
         time.sleep(3)
-        camera_selected = 7
-        switch_stream_tab(7)
+        camera_selected = default_stream
+        switch_stream_tab(default_stream)
     except Exception as ex:
         print_exception(ex, 'Error creating stream browser: ')
 
@@ -228,7 +229,7 @@ def set_default_led_states():
     set_led_red(pihole_off_5)
     set_led_red(pihole_off_60)
     set_led_red(midea_off)
-    set_led_yellow(stream_medley)  # stream 7
+    set_led_yellow(stream_medley)  # default stream, stream 7
     set_led_red(garage_safety)
     set_led_yellow(garage_light)
     set_led_yellow(garage_door)
@@ -492,11 +493,12 @@ def process_button(button_state):
             if button_position == stream_5:
                 switch_camera(5, button_position)
             if button_position == stream_6:
-                switch_camera(8, button_position)
-            if button_position == stream_medley2:
                 switch_camera(6, button_position)
             if button_position == stream_medley:
                 switch_camera(7, button_position)
+            if button_position == stream_medley2:
+                switch_camera(8, button_position)
+
 
             # Brightness
             if button_position == brightness_inc:
