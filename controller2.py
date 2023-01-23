@@ -52,12 +52,13 @@ stream_2 = 65
 stream_3 = 66
 stream_4 = 67
 stream_5 = 68
+stream_6 = 69
 stream_medley2 = 84
 stream_medley = 85
 brightness_inc = 8
 brightness_dec = 24
-stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_medley2,
-                  stream_medley, brightness_inc, brightness_dec]
+stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_6,
+                  stream_medley, stream_medley2, brightness_inc, brightness_dec]
 midea_off = 32
 midea_dry = 33
 midea_cool = 34
@@ -103,7 +104,7 @@ def init_stream_process():
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream {STREAM_MEDLEY2} {STREAM_MEDLEY}'
+          f'{STREAM_BASE}/5/stream {STREAM_MEDLEY2} {STREAM_MEDLEY} {STREAM_BASE}/6/stream'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -490,6 +491,8 @@ def process_button(button_state):
                 switch_camera(4, button_position)
             if button_position == stream_5:
                 switch_camera(5, button_position)
+            if button_position == stream_6:
+                switch_camera(8, button_position)
             if button_position == stream_medley2:
                 switch_camera(6, button_position)
             if button_position == stream_medley:
