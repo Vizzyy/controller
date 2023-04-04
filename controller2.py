@@ -555,6 +555,7 @@ def process_button(button_state):
                 camera_selected = 1
 
             if button_position in stream_refresh_button:
+                print(f'if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
                 refresh_stream_tab()
 
             if button_position in display_sleep_button:
