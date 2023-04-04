@@ -463,6 +463,11 @@ def process_button(button_state):
                 handle_ptz_api_req(button_position, push_state)
         # on release
         else:
+            print(f'outside - if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
+            if button_position in stream_refresh_button:
+                print(f'if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
+                refresh_stream_tab()
+
             # Office lights
             if button_position == lights_off:
                 office_light_request('clear', button_position)
@@ -553,11 +558,6 @@ def process_button(button_state):
                 init_stream_process()
                 set_default_led_states()
                 camera_selected = 1
-
-            print(f'outside - if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
-            if button_position in stream_refresh_button:
-                print(f'if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
-                refresh_stream_tab()
 
             if button_position in display_sleep_button:
                 handle_display_sleep(button_position)
