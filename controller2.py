@@ -90,7 +90,7 @@ audio_disable = 119
 audio_buttons = [audio_enable, audio_disable]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
                   garage_buttons + camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
-                  volume_buttons + audio_buttons + launchpad_sleep
+                  volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
 
 
 def print_exception(exception, msg=''):
@@ -463,11 +463,6 @@ def process_button(button_state):
                 handle_ptz_api_req(button_position, push_state)
         # on release
         else:
-            print(f'outside - if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
-            if button_position in stream_refresh_button:
-                print(f'if button_position in stream_refresh_button: {button_position} - {stream_refresh_button}')
-                refresh_stream_tab()
-
             # Office lights
             if button_position == lights_off:
                 office_light_request('clear', button_position)
@@ -558,6 +553,9 @@ def process_button(button_state):
                 init_stream_process()
                 set_default_led_states()
                 camera_selected = 1
+
+            if button_position in stream_refresh_button:
+                refresh_stream_tab()
 
             if button_position in display_sleep_button:
                 handle_display_sleep(button_position)
