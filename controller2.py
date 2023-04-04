@@ -304,7 +304,7 @@ def pihole_request(mode, button_position):
     else:
         set_led_green(4)
         set_led_red(5)
-        set_led_red(6)
+        # set_led_red(6)
 
 
 def midea_request(button_position, **kwargs):
