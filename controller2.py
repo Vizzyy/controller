@@ -27,7 +27,7 @@ camera_w_led_state = 0
 browser_pid = None
 display_sleep_enabled = True
 launchpad_sleep_enabled = False
-bluetooth_connected = True
+bluetooth_connected = False
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 volume_setting = 4  # current index in above array of preset volumes
 
@@ -37,6 +37,7 @@ backlight.fade_duration = 0.5
 brightness_setting = 4
 
 stream_reset_button = [207]  # "mixer" button
+stream_refresh_button = [7]  # right below "mixer" button
 display_sleep_button = [204]  # "session" button
 bluetooth_button = [205]  # "user1" button
 launchpad_sleep = [206]  # "user2" button
@@ -45,9 +46,9 @@ lights_white = 1
 lights_rainbow = 2
 lights_buttons = [lights_off, lights_white, lights_rainbow]
 pihole_on = 4
-pihole_off_5 = 5
-pihole_off_60 = 6
-pihole_buttons = [pihole_on, pihole_off_5, pihole_off_60]
+# pihole_off_5 = 5
+pihole_off_60 = 5
+pihole_buttons = [pihole_on, pihole_off_60]
 stream_1 = 64
 stream_2 = 65
 stream_3 = 66
@@ -142,15 +143,25 @@ def connect_to_bluetooth(connect=True):
 
 def switch_stream_tab(stream_id):
     cmd = f'sh /home/pi/switch-to-tab.sh {stream_id}'
-    # print(f'switch_stream_tab: stream_id {stream_id} - {cmd}')
+    print(f'switch_stream_tab: stream_id {stream_id} - {cmd}')
 
     process = subprocess.run(f"{cmd}",
                              shell=True,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              encoding='utf8')
-    # print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
+    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
+def refresh_stream_tab():
+    cmd = f'sh /home/pi/refresh-tab.sh'
+    print(f'refresh_stream_tab - {cmd}')
+
+    process = subprocess.run(f"{cmd}",
+                             shell=True,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             encoding='utf8')
+    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
 def set_display_sleep(enabled):  # enabled is either 0 or 1
     enabled_bool = enabled == 1
@@ -226,7 +237,8 @@ def set_default_led_states():
 
     # Custom default states
     set_led_red(lights_off) 
-    set_led_red(pihole_off_5)
+    # set_led_red(pihole_off_5)
+    set_led_yellow(stream_refresh_button[0])
     set_led_red(pihole_off_60)
     set_led_red(midea_off)
     set_led_yellow(stream_medley)  # default stream, stream 7
@@ -242,9 +254,9 @@ def set_default_led_states():
 
 
 def initialize():
-    connect_to_bluetooth()
     init_stream_process()
     set_volume(volume_setting)
+    connect_to_bluetooth()
     set_default_led_states()
     print(f'Finished initializing!')
 
@@ -541,6 +553,9 @@ def process_button(button_state):
                 init_stream_process()
                 set_default_led_states()
                 camera_selected = 1
+
+            if button_position in stream_refresh_button:
+                refresh_stream_tab()
 
             if button_position in display_sleep_button:
                 handle_display_sleep(button_position)
