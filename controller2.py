@@ -474,8 +474,8 @@ def process_button(button_state):
             # Pihole
             if button_position == pihole_on:
                 pihole_request('enable', button_position)
-            if button_position == pihole_off_5:
-                pihole_request('disable=300', button_position)
+            # if button_position == pihole_off_5:
+            #     pihole_request('disable=300', button_position)
             if button_position == pihole_off_60:
                 pihole_request('disable=3600', button_position)
 
