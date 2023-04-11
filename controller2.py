@@ -21,7 +21,7 @@ midea_target_temp = 25
 WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
-default_stream = 7
+default_stream = 8 # 8 = external medley
 camera_selected = default_stream
 camera_w_led_state = 0
 browser_pid = None
