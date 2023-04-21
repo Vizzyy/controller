@@ -31,6 +31,17 @@ bluetooth_connected = False
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 volume_setting = 4  # current index in above array of preset volumes
 
+loft_lights_state = {
+    17: {
+        'alias': 'Loft Lamp',
+        'state': False
+    }, 
+    18: {
+        'alias': 'Loft Stairs',
+        'state': False
+    }
+}
+
 backlight = rpi_backlight.Backlight()
 brightness_settings = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 backlight.fade_duration = 0.5
@@ -44,7 +55,9 @@ launchpad_sleep = [206]  # "user2" button
 lights_off = 0
 lights_white = 1
 lights_rainbow = 2
-lights_buttons = [lights_off, lights_white, lights_rainbow]
+lights_loft_lamp = 17
+lights_loft_stairs = 18
+lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp, lights_loft_stairs]
 pihole_on = 4
 # pihole_off_5 = 5
 pihole_off_60 = 5
@@ -105,6 +118,7 @@ def init_stream_process():
         browser_process.kill()
 
     cmd = f'killall chromium-browser; DISPLAY=:0 chromium-browser --kiosk --incognito --start-maximized ' \
+          f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
           f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_BASE}/7/stream {STREAM_MEDLEY} {STREAM_MEDLEY2}'
     print(f'init_stream_process: {cmd}')
@@ -230,6 +244,16 @@ def set_volume(volume_index):
                              encoding='utf8')
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
+def kasa_request(alias, new_state):
+    cmd = f'kasa --alias "{alias}" --type dimmer {"on" if new_state else "off"}'
+    print(f'kasa_request: {cmd}')
+
+    process = subprocess.run(f"su - pi -c '{cmd}'",
+                             shell=True,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             encoding='utf8')
+    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
 def set_default_led_states():
     for button in enabled_buttons:
@@ -470,6 +494,10 @@ def process_button(button_state):
                 office_light_request('white', button_position)
             if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
+            if button_position in [lights_loft_lamp, lights_loft_stairs]:
+                loft_lights_state[button_position]['state'] = not loft_lights_state[button_position]['state']
+                kasa_request(loft_lights_state[button_position]['alias'], loft_lights_state[button_position]['state'])
+                set_led_green(button_position) if loft_lights_state[button_position]['state'] else set_led_yellow(button_position)
 
             # Pihole
             if button_position == pihole_on:

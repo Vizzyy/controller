@@ -2,3 +2,4 @@ requests
 midea-beautiful-air
 rpi-backlight
 schedule
+python-kasa
