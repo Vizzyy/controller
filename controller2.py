@@ -34,11 +34,11 @@ volume_setting = 4  # current index in above array of preset volumes
 loft_lights_state = {
     17: {
         'alias': 'Loft Lamp',
-        'state': False
+        'state': True
     }, 
     18: {
         'alias': 'Loft Stairs',
-        'state': False
+        'state': True
     }
 }
 
