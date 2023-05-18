@@ -320,15 +320,17 @@ def garage_request(mode, button_position):
 
 def pihole_request(mode, button_position):
     global pihole_enabled
-    r = requests.get(f'http://{PIHOLE_HOST}/admin/api.php?{mode}&auth={PIHOLE_AUTH}')
-    print(f'pihole_request: {mode} - response: {r.status_code}')
-    if "disable" in mode:
-        set_led_yellow(button_position)
-        pihole_enabled = False
-    else:
-        set_led_green(4)
-        set_led_red(5)
-        # set_led_red(6)
+    try:
+        r = requests.get(f'http://{PIHOLE_HOST}/admin/api.php?{mode}&auth={PIHOLE_AUTH}', timeout=2)
+        print(f'pihole_request: {mode} - response: {r.status_code}')
+        if "disable" in mode:
+            set_led_yellow(button_position)
+            pihole_enabled = False
+        else:
+            set_led_green(4)
+            set_led_red(5)
+    except requests.exceptions.Timeout:
+        print('The request timed out.')
 
 
 def midea_request(button_position, **kwargs):
