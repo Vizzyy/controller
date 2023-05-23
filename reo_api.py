@@ -111,6 +111,7 @@ def api_ctrl(*,
                                  json=payload,
                                  params={'cmd': cmd, 'token': API_TOKEN},
                                  verify=False)
+        
         response_body = response.json()
         try:
             response_code = next(item_generator(response_body, 'rspCode'))
@@ -124,7 +125,7 @@ def api_ctrl(*,
             raise Exception(f'Inner exception: {type(inner_ex).__name__} - {inner_ex} - {response_body}')
         print(f'api_ctrl: channel - {channel}, op - {op}, speed: {speed}, response - {response_body}')
     except Exception as e:
-        print(f'{type(e).__name__} - {e}')
+        print(f'{type(e).__name__} - {e} - {response}')
 
 
 # start = time.time()
