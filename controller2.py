@@ -572,7 +572,7 @@ def process_button(button_state):
                     set_led_yellow(garage_door)
             if button_position == garage_light:
                 if not garage_safety_on:
-                    garage_request('light', button_position)
+                    # garage_request('light', button_position)
                     kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
                     kasa_request(f"{kasa_device_state[button_position]['alias']}1", kasa_device_state[button_position]['state'])
                     kasa_request(f"{kasa_device_state[button_position]['alias']}2", kasa_device_state[button_position]['state'])
