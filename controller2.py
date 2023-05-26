@@ -31,17 +31,6 @@ bluetooth_connected = False
 volume_settings = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 volume_setting = 4  # current index in above array of preset volumes
 
-loft_lights_state = {
-    17: {
-        'alias': 'Loft Lamp',
-        'state': True
-    }, 
-    18: {
-        'alias': 'Loft Stairs',
-        'state': True
-    }
-}
-
 backlight = rpi_backlight.Backlight()
 brightness_settings = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 backlight.fade_duration = 0.5
@@ -105,6 +94,21 @@ audio_buttons = [audio_enable, audio_disable]
 enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
                   garage_buttons + camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
+
+kasa_device_state = {
+    lights_loft_lamp: {
+        'alias': 'Loft Lamp',
+        'state': True
+    }, 
+    lights_loft_stairs: {
+        'alias': 'Loft Stairs',
+        'state': True
+    },
+    garage_light: {
+        'alias': 'Garage',
+        'state': False
+    }
+}
 
 
 def print_exception(exception, msg=''):
@@ -497,9 +501,9 @@ def process_button(button_state):
             if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
             if button_position in [lights_loft_lamp, lights_loft_stairs]:
-                loft_lights_state[button_position]['state'] = not loft_lights_state[button_position]['state']
-                kasa_request(loft_lights_state[button_position]['alias'], loft_lights_state[button_position]['state'])
-                set_led_green(button_position) if loft_lights_state[button_position]['state'] else set_led_yellow(button_position)
+                kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
+                kasa_request(kasa_device_state[button_position]['alias'], kasa_device_state[button_position]['state'])
+                set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
 
             # Pihole
             if button_position == pihole_on:
@@ -573,6 +577,10 @@ def process_button(button_state):
             if button_position == garage_light:
                 if not garage_safety_on:
                     garage_request('light', button_position)
+                    kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
+                    kasa_request(f"{kasa_device_state[button_position]['alias']}1", kasa_device_state[button_position]['state'])
+                    kasa_request(f"{kasa_device_state[button_position]['alias']}2", kasa_device_state[button_position]['state'])
+                    set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
                     garage_request('door', button_position)
