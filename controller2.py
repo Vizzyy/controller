@@ -463,11 +463,14 @@ def handle_ptz_api_req(button_position, push_state):
                 reo_api.api_ctrl(channel=api_channel, w_led_state=camera_w_led_state, cmd='SetWhiteLed')
             else:
                 # we want to reuse the LED button for a second default position for the puppy cam
-                # position 0 should be "Couch"
                 reo_api.api_ctrl(channel=api_channel, op='ToPos', speed=speed, preset_id=0)
 
         if button_position == camera_home_reset:
-            reo_api.api_ctrl(channel=api_channel, cmd='SetPtzPreset')
+            if camera_selected != 7:
+                reo_api.api_ctrl(channel=api_channel, cmd='SetPtzPreset')
+            else:
+                # we want to reuse the LED button for a second default position for the puppy cam
+                reo_api.api_ctrl(channel=api_channel, op='ToPos', speed=speed, preset_id=2)
 
     else:
         if button_position in [camera_home]:
