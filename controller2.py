@@ -432,6 +432,10 @@ def handle_ptz_api_req(button_position, push_state):
     home_position_index = 1
     api_channel = camera_selected - 1
 
+    # From medley screen, control the puppy cam 
+    if camera_selected == 7:
+        api_channel -= 1
+
     # print(f'handle_ptz_api_req = camera_selected: {camera_selected} - '
     #       f'button_position: {button_position} - push_state: {push_state}')
 
