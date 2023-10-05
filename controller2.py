@@ -281,13 +281,18 @@ def kasa_get_state(alias):
 def update_kasa_states():
     if kasa_get_state('Loft Stairs'):
         set_led_green(lights_loft_stairs)
+        kasa_device_state[lights_loft_stairs]['state'] = True
     else:
         set_led_yellow(lights_loft_stairs)
+        kasa_device_state[lights_loft_stairs]['state'] = False
+
 
     if kasa_get_state('Loft Lamp'):
         set_led_green(lights_loft_lamp)
+        kasa_device_state[lights_loft_lamp]['state'] = True
     else:
-        set_led_yellow(lights_loft_lamp)    
+        set_led_yellow(lights_loft_lamp)  
+        kasa_device_state[lights_loft_lamp]['state'] = False  
 
 
 def set_default_led_states():
@@ -660,7 +665,7 @@ initialize()
 midea_refresh_counter = 0
 midea_refresh_limit = 3000  # 5 minutes
 schedule.every().day.at("05:40").do(init_stream_process)
-schedule.every().minute.do(update_kasa_states)
+schedule.every(10).minutes.do(update_kasa_states)
 update_kasa_states()
 
 while 1:
