@@ -273,7 +273,7 @@ def kasa_get_state(alias):
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
     m = re.search(r'.*Device state: (True|False)\b.*', process.stdout)
-    state = bool(m.group(1))
+    state = True if m.group(1) == "True" else False
     print(f'State: {alias} = {state}')
     return state
 
@@ -661,6 +661,7 @@ midea_refresh_counter = 0
 midea_refresh_limit = 3000  # 5 minutes
 schedule.every().day.at("05:40").do(init_stream_process)
 schedule.every().minute.do(update_kasa_states)
+update_kasa_states()
 
 while 1:
     midea_refresh_counter += 1
