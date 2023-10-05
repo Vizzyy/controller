@@ -7,6 +7,7 @@ import subprocess
 import time
 import reo_api
 import rpi_backlight
+import re
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -247,6 +248,7 @@ def set_volume(volume_index):
                              encoding='utf8')
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
+
 def kasa_request(alias, new_state):
     cmd = f'kasa --alias "{alias}" --type dimmer {"on" if new_state else "off"}'
     print(f'kasa_request: {cmd}')
@@ -258,12 +260,42 @@ def kasa_request(alias, new_state):
                              encoding='utf8')
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
+
+def kasa_get_state(alias):
+    cmd = f'kasa --alias "{alias}" --type plug'
+    print(f'kasa_request: {cmd}')
+
+    process = subprocess.run(f"su - pi -c '{cmd}'",
+                             shell=True,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             encoding='utf8')
+    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
+
+    m = re.search(r'.*Device state: (True|False)\b.*', process.stdout)
+    state = bool(m.group(1))
+    print(f'State: {alias} = {state}')
+    return state
+
+
+def update_kasa_states():
+    if kasa_get_state('Loft Stairs'):
+        set_led_green(lights_loft_stairs)
+    else:
+        set_led_yellow(lights_loft_stairs)
+
+    if kasa_get_state('Loft Lamp'):
+        set_led_green(lights_loft_lamp)
+    else:
+        set_led_yellow(lights_loft_lamp)    
+
+
 def set_default_led_states():
     for button in enabled_buttons:
         set_led_green(button)
 
     # Custom default states
-    set_led_red(lights_off) 
+    set_led_red(lights_off)
     # set_led_red(pihole_off_5)
     set_led_yellow(stream_refresh_button[0])
     set_led_red(pihole_off_60)
@@ -628,6 +660,7 @@ initialize()
 midea_refresh_counter = 0
 midea_refresh_limit = 3000  # 5 minutes
 schedule.every().day.at("05:40").do(init_stream_process)
+schedule.every().minute.do(update_kasa_states)
 
 while 1:
     midea_refresh_counter += 1
