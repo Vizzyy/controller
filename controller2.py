@@ -8,6 +8,7 @@ import time
 import reo_api
 import rpi_backlight
 import re
+import json
 
 # Mk1 Launchpad:
 lp = launchpad.Launchpad()
@@ -362,7 +363,7 @@ def garage_request(mode, entity, button_position):
         'Authorization': f'Bearer {HA_API_KEY}',
         'content-type': 'application/json'
     },
-    data = {
+    json = {
         'entity_id': f'{entity}'
     })
 
