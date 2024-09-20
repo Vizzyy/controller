@@ -363,7 +363,7 @@ def garage_request(mode, entity, button_position):
         'content-type': 'application/json'
     },
     data = {
-        'entity_id': entity
+        'entity_id': f'{entity}'
     })
 
     print(f'garage_request: {mode} - text: {r.text} - status_code: {r.status_code}')
