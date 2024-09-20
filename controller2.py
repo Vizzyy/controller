@@ -357,7 +357,7 @@ def garage_request(mode, entity, button_position):
     # -H "Authorization: Bearer $HA_API_KEY" \
     # -H "Content-Type: application/json" -d '{"entity_id": "$HA_GARAGE_LIGHT_ENTITY"}' \
     # http://$HA_HOST/api/services/$MODE/toggle
-    r = requests.get(f'http://{HA_HOST}/api/services/{mode}/toggle',
+    r = requests.post(f'http://{HA_HOST}/api/services/{mode}/toggle',
     headers={
         'Authorization': f'Bearer {HA_API_KEY}',
         'content-type': 'application/json'
