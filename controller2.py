@@ -352,9 +352,21 @@ def office_light_request(mode, button_position):
         set_led_green(button_position)
 
 
-def garage_request(mode, button_position):
-    r = requests.get(f'http://{GARAGE_HOST}/garage/{mode}')
-    print(f'garage_request: {mode} - response: {r.status_code}')
+def garage_request(mode, entity, button_position):
+    #curl -X POST \
+    # -H "Authorization: Bearer $HA_API_KEY" \
+    # -H "Content-Type: application/json" -d '{"entity_id": "$HA_GARAGE_LIGHT_ENTITY"}' \
+    # http://$HA_HOST/api/services/$MODE/toggle
+    r = requests.get(f'http://{HA_HOST}/api/services/{mode}/toggle',
+    headers={
+        'Authorization': f'Bearer {HA_API_KEY}',
+        'content-type': 'application/json'
+    },
+    data = {
+        'entity_id': entity
+    })
+
+    print(f'garage_request: {mode} - text: {r.text} - status_code: {r.status_code}')
     set_led_green(button_position)
 
 
@@ -362,7 +374,7 @@ def pihole_request(mode, button_position):
     global pihole_enabled
     try:
         r = requests.get(f'http://{PIHOLE_HOST}/admin/api.php?{mode}&auth={PIHOLE_AUTH}', timeout=2)
-        print(f'pihole_request: {mode} - response: {r.status_code}')
+        print(f'pihole_request: {mode} - status_code: {r.status_code}')
         if "disable" in mode:
             set_led_yellow(button_position)
             pihole_enabled = False
@@ -621,14 +633,14 @@ def process_button(button_state):
                     set_led_yellow(garage_door)
             if button_position == garage_light:
                 if not garage_safety_on:
-                    # garage_request('light', button_position)
                     kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
-                    kasa_request(f"{kasa_device_state[button_position]['alias']}1", kasa_device_state[button_position]['state'])
-                    kasa_request(f"{kasa_device_state[button_position]['alias']}2", kasa_device_state[button_position]['state'])
+                    garage_request('light', HA_GARAGE_LIGHT_1_ENTITY, button_position)
+                    garage_request('light', HA_GARAGE_LIGHT_2_ENTITY, button_position)
+                    garage_request('light', HA_GARAGE_LIGHT_3_ENTITY, button_position)
                     set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
-                    garage_request('door', button_position)
+                    garage_request('cover', HA_GARAGE_DOOR_ENTITY, button_position)
 
             # Onvif
             if button_position in camera_buttons:
