@@ -1,7 +1,6 @@
 import schedule
 import launchpad
 import requests
-import midea_beautiful
 from config import *
 import subprocess
 import time
@@ -19,7 +18,6 @@ lp.Reset()  # turn off LEDs
 
 appliance = None
 pihole_enabled = True
-midea_target_temp = 25
 WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
@@ -65,12 +63,6 @@ brightness_inc = 8
 brightness_dec = 24
 stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_6, stream_7,
                   stream_medley, brightness_inc, brightness_dec]
-midea_off = 32
-midea_dry = 33
-midea_cool = 34
-midea_temp_up = 36
-midea_temp_down = 37
-midea_buttons = [midea_off, midea_dry, midea_cool, midea_temp_up, midea_temp_down]
 garage_safety = 71
 garage_light = 72
 garage_door = 56
@@ -92,8 +84,8 @@ volume_buttons = [volume_up, volume_down]
 audio_enable = 118
 audio_disable = 119
 audio_buttons = [audio_enable, audio_disable]
-enabled_buttons = lights_buttons + pihole_buttons + midea_buttons + stream_buttons + \
-                  garage_buttons + camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
+enabled_buttons = lights_buttons + pihole_buttons + stream_buttons + garage_buttons + \
+                  camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
 
 kasa_device_state = {
@@ -305,7 +297,6 @@ def set_default_led_states():
     # set_led_red(pihole_off_5)
     set_led_yellow(stream_refresh_button[0])
     set_led_red(pihole_off_60)
-    set_led_red(midea_off)
     set_led_yellow(stream_medley)  # default stream, stream 7
     set_led_red(garage_safety)
     set_led_yellow(garage_light)
@@ -353,12 +344,8 @@ def office_light_request(mode, button_position):
         set_led_green(button_position)
 
 
-def garage_request(mode, entity, button_position):
-    #curl -X POST \
-    # -H "Authorization: Bearer $HA_API_KEY" \
-    # -H "Content-Type: application/json" -d '{"entity_id": "$HA_GARAGE_LIGHT_ENTITY"}' \
-    # http://$HA_HOST/api/services/$MODE/toggle
-    r = requests.post(f'http://{HA_HOST}/api/services/{mode}/toggle',
+def ha_api_request(mode, entity, button_position, action='toggle'):
+    r = requests.post(f'http://{HA_HOST}/api/services/{mode}/{action}',
     headers={
         'Authorization': f'Bearer {HA_API_KEY}',
         'content-type': 'application/json'
@@ -366,8 +353,7 @@ def garage_request(mode, entity, button_position):
     json = {
         'entity_id': f'{entity}'
     })
-
-    print(f'garage_request: {mode} - text: {r.text} - status_code: {r.status_code}')
+    print(f'ha_api_request: {mode} - text: {r.text} - action: {action} - status_code: {r.status_code}')
     set_led_green(button_position)
 
 
@@ -384,21 +370,6 @@ def pihole_request(mode, button_position):
             set_led_red(5)
     except requests.exceptions.Timeout:
         print('The request timed out.')
-
-
-def midea_request(button_position, **kwargs):
-    global appliance
-    print(f'midea_request: {button_position} - response: {kwargs}')
-    try:
-        if not appliance:
-            appliance = midea_beautiful.appliance_state(address=MIDEA_IP, token=MIDEA_TOKEN, key=MIDEA_KEY)
-        appliance.set_state(**kwargs)
-        if button_position == 32:
-            set_led_red(button_position)
-        else:
-            set_led_green(button_position)
-    except Exception as midea_error:
-        print(f'MIDEA ERROR: {type(midea_error).__name__} - {midea_error}')
 
 
 def switch_camera(mode, button_position):
@@ -541,7 +512,7 @@ def handle_ptz_api_req(button_position, push_state):
 
 
 def process_button(button_state):
-    global midea_target_temp, garage_safety_on, camera_selected, brightness_setting
+    global garage_safety_on, camera_selected, brightness_setting
     button_position = button_state[0]
     push_state = button_state[1]
 
@@ -563,7 +534,15 @@ def process_button(button_state):
                 office_light_request('rainbowCycle', button_position)
             if button_position in [lights_loft_lamp, lights_loft_stairs]:
                 kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
-                kasa_request(kasa_device_state[button_position]['alias'], kasa_device_state[button_position]['state'])
+                # kasa_request(kasa_device_state[button_position]['alias'], kasa_device_state[button_position]['state'])
+                if kasa_device_state[button_position]['state']:
+                    action = 'turn_on'
+                else:
+                    action = 'turn_off'
+                if button_position == lights_loft_lamp:
+                    ha_api_request('light', HA_LOFT_LAMP_ENTITY, button_position, action)
+                elif button_position == lights_loft_stairs:
+                    ha_api_request('light', HA_LOFT_STAIRS_ENTITY, button_position, action)
                 set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
 
             # Pihole
@@ -573,20 +552,6 @@ def process_button(button_state):
             #     pihole_request('disable=300', button_position)
             if button_position == pihole_off_60:
                 pihole_request('disable=3600', button_position)
-
-            # Midea
-            if button_position == midea_off:
-                midea_request(button_position, running=0)
-            if button_position == 33:
-                midea_request(button_position, mode=1, running=1)
-            if button_position == 34:
-                midea_request(button_position, mode=3, running=1)
-            if button_position == 36:
-                midea_target_temp -= .5
-                midea_request(button_position, target_temperature=midea_target_temp)
-            if button_position == 37:
-                midea_target_temp += .5
-                midea_request(button_position, target_temperature=midea_target_temp)
 
             # Streams
             if button_position == stream_1:
@@ -635,13 +600,13 @@ def process_button(button_state):
             if button_position == garage_light:
                 if not garage_safety_on:
                     kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
-                    garage_request('light', HA_GARAGE_LIGHT_1_ENTITY, button_position)
-                    garage_request('light', HA_GARAGE_LIGHT_2_ENTITY, button_position)
-                    garage_request('light', HA_GARAGE_LIGHT_3_ENTITY, button_position)
+                    ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY, button_position)
+                    ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY, button_position)
+                    ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY, button_position)
                     set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
-                    garage_request('cover', HA_GARAGE_DOOR_ENTITY, button_position)
+                    ha_api_request('cover', HA_GARAGE_DOOR_ENTITY, button_position)
 
             # Onvif
             if button_position in camera_buttons:
@@ -674,15 +639,11 @@ def process_button(button_state):
 
 
 initialize()
-# TODO: convert midea refresh using schedule
-midea_refresh_counter = 0
-midea_refresh_limit = 3000  # 5 minutes
 schedule.every().day.at("05:40").do(init_stream_process)
 schedule.every(10).minutes.do(update_kasa_states)
 update_kasa_states()
 
 while 1:
-    midea_refresh_counter += 1
     try:
         if but := lp.ButtonStateRaw():
             process_button(but)
@@ -690,11 +651,6 @@ while 1:
         break
     except Exception as e:
         print_exception(e)
-
-    if appliance and midea_refresh_counter > midea_refresh_limit:
-        print(f'Expiring midea token!')
-        appliance = None
-        midea_refresh_counter = 0
 
     schedule.run_pending()
     time.sleep(WAIT_TIME)  # this is super important, otherwise we destroy the CPU with busy-wait cycles
