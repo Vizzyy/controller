@@ -640,8 +640,8 @@ def process_button(button_state):
 
 initialize()
 schedule.every().day.at("05:40").do(init_stream_process)
-schedule.every(10).minutes.do(update_kasa_states)
-update_kasa_states()
+# schedule.every(10).minutes.do(update_kasa_states)
+# update_kasa_states()
 
 while 1:
     try:
