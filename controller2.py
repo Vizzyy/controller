@@ -58,11 +58,12 @@ stream_4 = 67
 stream_5 = 68
 stream_6 = 69
 stream_7 = 85 # previously 70
+stream_9 = 101
 stream_medley = 84
 brightness_inc = 8
 brightness_dec = 24
 stream_buttons = [stream_1, stream_2, stream_3, stream_4, stream_5, stream_6, stream_7,
-                  stream_medley, brightness_inc, brightness_dec]
+                  stream_9, stream_medley, brightness_inc, brightness_dec]
 garage_safety = 71
 garage_light = 72
 garage_door = 56
@@ -117,7 +118,7 @@ def init_stream_process():
     cmd = f'killall chromium; DISPLAY=:0 chromium --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_BASE}/7/stream {STREAM_MEDLEY}'
+          f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_BASE}/7/stream {STREAM_MEDLEY} {STREAM_BASE}/9/stream'
     print(f'init_stream_process: {cmd}')
 
     try:
@@ -570,6 +571,8 @@ def process_button(button_state):
                 switch_camera(7, button_position)
             if button_position == stream_medley:
                 switch_camera(8, button_position)
+            if button_position == stream_9:
+                switch_camera(9, button_position)
 
             # Brightness
             if button_position == brightness_inc:
