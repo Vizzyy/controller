@@ -17,7 +17,7 @@ lp.LedAllOn()
 lp.Reset()  # turn off LEDs
 
 appliance = None
-pihole_enabled = True
+# pihole_enabled = True
 WAIT_TIME = .1
 garage_safety_on = True
 browser_process = None
@@ -46,11 +46,13 @@ lights_white = 1
 lights_rainbow = 2
 lights_loft_lamp = 17
 lights_loft_stairs = 18
+lights_loft_desk = 33
+lights_loft_fan = 34
 lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp, lights_loft_stairs]
-pihole_on = 4
+# pihole_on = 4
 # pihole_off_5 = 5
-pihole_off_60 = 5
-pihole_buttons = [pihole_on, pihole_off_60]
+# pihole_off_60 = 5
+# pihole_buttons = [pihole_on, pihole_off_60]
 stream_1 = 64
 stream_2 = 65
 stream_3 = 66
@@ -85,7 +87,7 @@ volume_buttons = [volume_up, volume_down]
 audio_enable = 118
 audio_disable = 119
 audio_buttons = [audio_enable, audio_disable]
-enabled_buttons = lights_buttons + pihole_buttons + stream_buttons + garage_buttons + \
+enabled_buttons = lights_buttons + stream_buttons + garage_buttons + \
                   camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
 
@@ -297,7 +299,7 @@ def set_default_led_states():
     set_led_red(lights_off)
     # set_led_red(pihole_off_5)
     set_led_yellow(stream_refresh_button[0])
-    set_led_red(pihole_off_60)
+    # set_led_red(pihole_off_60)
     set_led_yellow(stream_medley)  # default stream, stream 7
     set_led_red(garage_safety)
     set_led_yellow(garage_light)
@@ -337,8 +339,8 @@ def set_led_red(button_position):
 def office_light_request(mode, button_position):
     r = requests.get(f'http://{OFFICE_LIGHT_HOST}/inside/arrange/{mode}')
     print(f'office_light_request: {mode} - response: {r.status_code}')
-    r = requests.get(f'http://{OFFICE_LIGHT_HOST2}/outside/arrange/{mode}')
-    print(f'office_light_request2: {mode} - response: {r.status_code}')
+    # r = requests.get(f'http://{OFFICE_LIGHT_HOST2}/outside/arrange/{mode}')
+    # print(f'office_light_request2: {mode} - response: {r.status_code}')
     if "clear" in mode:
         set_led_red(button_position)
     else:
@@ -358,19 +360,19 @@ def ha_api_request(mode, entity, button_position, action='toggle'):
     set_led_green(button_position)
 
 
-def pihole_request(mode, button_position):
-    global pihole_enabled
-    try:
-        r = requests.get(f'http://{PIHOLE_HOST}/admin/api.php?{mode}&auth={PIHOLE_AUTH}', timeout=2)
-        print(f'pihole_request: {mode} - status_code: {r.status_code}')
-        if "disable" in mode:
-            set_led_yellow(button_position)
-            pihole_enabled = False
-        else:
-            set_led_green(4)
-            set_led_red(5)
-    except requests.exceptions.Timeout:
-        print('The request timed out.')
+# def pihole_request(mode, button_position):
+#     global pihole_enabled
+#     try:
+#         r = requests.get(f'http://{PIHOLE_HOST}/admin/api.php?{mode}&auth={PIHOLE_AUTH}', timeout=2)
+#         print(f'pihole_request: {mode} - status_code: {r.status_code}')
+#         if "disable" in mode:
+#             set_led_yellow(button_position)
+#             pihole_enabled = False
+#         else:
+#             set_led_green(4)
+#             set_led_red(5)
+#     except requests.exceptions.Timeout:
+#         print('The request timed out.')
 
 
 def switch_camera(mode, button_position):
@@ -533,7 +535,7 @@ def process_button(button_state):
                 office_light_request('white', button_position)
             if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
-            if button_position in [lights_loft_lamp, lights_loft_stairs]:
+            if button_position in [lights_loft_lamp, lights_loft_stairs, lights_loft_fan, lights_loft_desk]:
                 kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
                 # kasa_request(kasa_device_state[button_position]['alias'], kasa_device_state[button_position]['state'])
                 if kasa_device_state[button_position]['state']:
@@ -544,15 +546,19 @@ def process_button(button_state):
                     ha_api_request('light', HA_LOFT_LAMP_ENTITY, button_position, action)
                 elif button_position == lights_loft_stairs:
                     ha_api_request('light', HA_LOFT_STAIRS_ENTITY, button_position, action)
+                elif button_position == lights_loft_fan:
+                    ha_api_request('light', HA_LOFT_CEILING_ENTITY, button_position, action)
+                elif button_position == lights_loft_desk:
+                    ha_api_request('light', HA_LOFT_DESK_ENTITY, button_position, action)
                 set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
 
-            # Pihole
-            if button_position == pihole_on:
-                pihole_request('enable', button_position)
-            # if button_position == pihole_off_5:
-            #     pihole_request('disable=300', button_position)
-            if button_position == pihole_off_60:
-                pihole_request('disable=3600', button_position)
+            # # Pihole
+            # if button_position == pihole_on:
+            #     pihole_request('enable', button_position)
+            # # if button_position == pihole_off_5:
+            # #     pihole_request('disable=300', button_position)
+            # if button_position == pihole_off_60:
+            #     pihole_request('disable=3600', button_position)
 
             # Streams
             if button_position == stream_1:
