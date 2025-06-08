@@ -283,21 +283,21 @@ def kasa_get_state(alias):
     return state
 
 
-def update_kasa_states():
-    if kasa_get_state('Loft Stairs'):
-        set_led_green(lights_loft_stairs)
-        kasa_device_state[lights_loft_stairs]['state'] = True
-    else:
-        set_led_yellow(lights_loft_stairs)
-        kasa_device_state[lights_loft_stairs]['state'] = False
+# def update_kasa_states():
+#     if kasa_get_state('Loft Stairs'):
+#         set_led_green(lights_loft_stairs)
+#         kasa_device_state[lights_loft_stairs]['state'] = True
+#     else:
+#         set_led_yellow(lights_loft_stairs)
+#         kasa_device_state[lights_loft_stairs]['state'] = False
 
 
-    if kasa_get_state('Loft Lamp'):
-        set_led_green(lights_loft_lamp)
-        kasa_device_state[lights_loft_lamp]['state'] = True
-    else:
-        set_led_yellow(lights_loft_lamp)  
-        kasa_device_state[lights_loft_lamp]['state'] = False  
+#     if kasa_get_state('Loft Lamp'):
+#         set_led_green(lights_loft_lamp)
+#         kasa_device_state[lights_loft_lamp]['state'] = True
+#     else:
+#         set_led_yellow(lights_loft_lamp)  
+#         kasa_device_state[lights_loft_lamp]['state'] = False  
 
 
 def set_default_led_states():
