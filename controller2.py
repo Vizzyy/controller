@@ -48,7 +48,8 @@ lights_loft_lamp = 17
 lights_loft_stairs = 18
 lights_loft_desk = 33
 lights_loft_fan = 34
-lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp, lights_loft_stairs, lights_loft_desk, lights_loft_fan]
+lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp, 
+                  lights_loft_stairs, lights_loft_desk, lights_loft_fan]
 # pihole_on = 4
 # pihole_off_5 = 5
 # pihole_off_60 = 5
@@ -93,7 +94,7 @@ enabled_buttons = lights_buttons + stream_buttons + garage_buttons + \
 
 kasa_device_state = {
     lights_loft_lamp: {
-        'alias': 'Loft Lamp',
+        'alias': 'Loft Floor Lamp',
         'state': True
     }, 
     lights_loft_stairs: {
@@ -103,7 +104,15 @@ kasa_device_state = {
     garage_light: {
         'alias': 'Garage',
         'state': False
-    }
+    },
+    lights_loft_desk: {
+        'alias': 'Loft Desk Lamp',
+        'state': True
+    },
+    lights_loft_fan: {
+        'alias': 'Loft Ceiling',
+        'state': True
+    },
 }
 
 
