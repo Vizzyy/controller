@@ -203,19 +203,19 @@ def set_display_brightness(brightness_idx):  # position in brightness_settings a
 def enable_audio(enabled=True):  # enabled is either 0 or 1
     global camera_selected
 
-    audio_user = ONVIF_1_USER
-    audio_pass = ONVIF_1_PASS
-    audio_channel = '1'
+    # audio_user = ONVIF_1_USER
+    # audio_pass = ONVIF_1_PASS
+    # audio_channel = '1'
 
-    if camera_selected == 1:
-        audio_address = ONVIF_1_HOST
-    elif camera_selected == 2:
-        audio_address = ONVIF_2_HOST
-    else:
-        audio_pass = NVR_PASS
-        audio_user = NVR_USER
-        audio_address = NVR_HOST
-        audio_channel = f'{camera_selected}'
+    # if camera_selected == 1:
+    #     audio_address = ONVIF_1_HOST
+    # elif camera_selected == 2:
+    #     audio_address = ONVIF_2_HOST
+    # else:
+    audio_pass = NVR_PASS
+    audio_user = NVR_USER
+    audio_address = NVR_HOST
+    audio_channel = f'{camera_selected}'
 
     if enabled:
 
