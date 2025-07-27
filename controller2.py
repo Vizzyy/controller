@@ -349,10 +349,10 @@ def poll_ha_entity_state(entity):
         'Authorization': f'Bearer {HA_API_KEY}',
         'content-type': 'application/json'
     })
-    print(f'poll_ha_entity_state: {entity} - text: {r.text} - status_code: {r.status_code}')
     try:
         response = json.loads(r.text)
         state = response.get('state')
+        print(f'poll_ha_entity_state: {entity} - state: {state} - status_code: {r.status_code}')
         return state
     except Exception as e:
         print(f'Error during poll_ha_entity_state: {type(e).__name__} - {e}')
