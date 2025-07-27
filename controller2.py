@@ -363,7 +363,7 @@ def update_ha_entity_states():
     for button_position in entity_states.keys():
         entity = entity_states[button_position]
         state = poll_ha_entity_state(entity['entity'])
-        print(f'update_ha_entity_states - entity: {entity['entity']}, state: {state}')
+        print(f'update_ha_entity_states - entity: {entity["entity"]}, state: {state}')
         if state in ['on', 'open']:
             set_led_green(button_position)
             entity_states[button_position]['state'] = True
