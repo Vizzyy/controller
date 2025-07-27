@@ -91,31 +91,49 @@ enabled_buttons = lights_buttons + stream_buttons + garage_buttons + [loft_ceili
                   camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
                   volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
 
-kasa_device_state = {
+entity_states = {
     lights_loft_lamp: {
         'alias': 'Loft Floor Lamp',
-        'state': True
+        'state': True,
+        'entity': HA_LOFT_LAMP_ENTITY,
+        'mode': 'light'
     }, 
     lights_loft_stairs: {
         'alias': 'Loft Stairs',
-        'state': True
+        'state': True,
+        'entity': HA_LOFT_STAIRS_ENTITY,
+        'mode': 'light'
     },
     garage_light: {
-        'alias': 'Garage',
-        'state': False
+        'alias': 'Garage Light',
+        'state': False,
+        'entity': HA_GARAGE_LIGHT_1_ENTITY,
+        'mode': 'light'
     },
     lights_loft_desk: {
         'alias': 'Loft Desk Lamp',
-        'state': True
+        'state': True,
+        'entity': HA_LOFT_DESK_ENTITY,
+        'mode': 'light'
     },
     lights_loft_fan: {
         'alias': 'Loft Ceiling',
-        'state': True
+        'state': True,
+        'entity': HA_LOFT_CEILING_ENTITY,
+        'mode': 'light'
     },
     loft_ceiling_fan: {
         'alias': 'Loft Ceiling Fan',
-        'state': True
+        'state': True,
+        'entity': HA_LOFT_FAN_ENTITY,
+        'mode': 'fan'
     },
+    garage_door: {
+        'alias': 'Garage Door',
+        'state': False,
+        'entity': HA_GARAGE_DOOR_ENTITY,
+        'mode': 'cover'
+    }
 }
 
 
@@ -257,52 +275,6 @@ def set_volume(volume_index):
     print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
 
 
-def kasa_request(alias, new_state):
-    cmd = f'kasa --alias "{alias}" --type dimmer {"on" if new_state else "off"}'
-    print(f'kasa_request: {cmd}')
-
-    process = subprocess.run(f"su - pi -c '{cmd}'",
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             encoding='utf8')
-    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
-
-
-def kasa_get_state(alias):
-    cmd = f'kasa --alias "{alias}" --type plug'
-    print(f'kasa_request: {cmd}')
-
-    process = subprocess.run(f"su - pi -c '{cmd}'",
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             encoding='utf8')
-    print(f'process.stdout: {process.stdout} - process.stderr: {process.stderr}')
-
-    m = re.search(r'.*Device state: (True|False)\b.*', process.stdout)
-    state = True if m.group(1) == "True" else False
-    print(f'State: {alias} = {state}')
-    return state
-
-
-# def update_kasa_states():
-#     if kasa_get_state('Loft Stairs'):
-#         set_led_green(lights_loft_stairs)
-#         kasa_device_state[lights_loft_stairs]['state'] = True
-#     else:
-#         set_led_yellow(lights_loft_stairs)
-#         kasa_device_state[lights_loft_stairs]['state'] = False
-
-
-#     if kasa_get_state('Loft Lamp'):
-#         set_led_green(lights_loft_lamp)
-#         kasa_device_state[lights_loft_lamp]['state'] = True
-#     else:
-#         set_led_yellow(lights_loft_lamp)  
-#         kasa_device_state[lights_loft_lamp]['state'] = False  
-
-
 def set_default_led_states():
     for button in enabled_buttons:
         set_led_green(button)
@@ -378,8 +350,27 @@ def poll_ha_entity_state(entity):
         'content-type': 'application/json'
     })
     print(f'poll_ha_entity_state: {entity} - text: {r.text} - status_code: {r.status_code}')
-    return r.text
+    try:
+        response = json.loads(r.text)
+        state = response.get('state')
+        return state
+    except Exception as e:
+        print(f'Error during poll_ha_entity_state: {type(e).__name__} - {e}')
+        return None
     
+
+def update_ha_entity_states():
+    for button_position in entity_states.keys():
+        entity = entity_states[button_position]
+        state = poll_ha_entity_state(entity['entity'])
+        print(f'update_ha_entity_states - entity: {entity['entity']}, state: {state}')
+        if state in ['on', 'open']:
+            set_led_green(button_position)
+            entity_states[button_position]['state'] = True
+        else:
+            set_led_yellow(button_position)
+            entity_states[button_position]['state'] = False
+
 
 def switch_camera(mode, button_position):
     global camera_selected, camera_w_led_state
@@ -542,8 +533,8 @@ def process_button(button_state):
             if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
             if button_position in [lights_loft_lamp, lights_loft_stairs, lights_loft_fan, lights_loft_desk, loft_ceiling_fan]:
-                kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
-                if kasa_device_state[button_position]['state']:
+                entity_states[button_position]['state'] = not entity_states[button_position]['state']
+                if entity_states[button_position]['state']:
                     action = 'turn_on'
                 else:
                     action = 'turn_off'
@@ -562,7 +553,7 @@ def process_button(button_state):
                 elif button_position == loft_ceiling_fan:
                     ha_api_request('fan', HA_LOFT_FAN_ENTITY, action)
                     set_led_green(button_position)
-                set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
+                set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
             # Streams
             if button_position == stream_1:
@@ -612,11 +603,11 @@ def process_button(button_state):
                     set_led_yellow(garage_door)
             if button_position == garage_light:
                 if not garage_safety_on:
-                    kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
+                    entity_states[button_position]['state'] = not entity_states[button_position]['state']
                     ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY)
                     ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY)
                     ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY)
-                    set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
+                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
                     ha_api_request('cover', HA_GARAGE_DOOR_ENTITY)
@@ -654,8 +645,9 @@ def process_button(button_state):
 
 initialize()
 schedule.every().day.at("05:40").do(init_stream_process)
+schedule.every(1).minutes.do(update_ha_entity_states)
 
-poll_ha_entity_state(HA_LOFT_DESK_ENTITY)
+update_ha_entity_states()
 
 while 1:
     try:
