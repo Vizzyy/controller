@@ -359,7 +359,7 @@ def office_light_request(mode, button_position):
         set_led_green(button_position)
 
 
-def ha_api_request(mode, entity, button_position, action='toggle'):
+def ha_api_request(mode, entity, action='toggle'):
     r = requests.post(f'http://{HA_HOST}/api/services/{mode}/{action}',
     headers={
         'Authorization': f'Bearer {HA_API_KEY}',
@@ -369,8 +369,17 @@ def ha_api_request(mode, entity, button_position, action='toggle'):
         'entity_id': f'{entity}'
     })
     print(f'ha_api_request: {mode} - text: {r.text} - action: {action} - status_code: {r.status_code}')
-    set_led_green(button_position)
 
+
+def poll_ha_entity_state(entity):
+    r = requests.get(f'http://{HA_HOST}/api/states/{entity}',
+    headers={
+        'Authorization': f'Bearer {HA_API_KEY}',
+        'content-type': 'application/json'
+    })
+    print(f'poll_ha_entity_state: {entity} - text: {r.text} - status_code: {r.status_code}')
+    return r.text
+    
 
 def switch_camera(mode, button_position):
     global camera_selected, camera_w_led_state
@@ -539,15 +548,20 @@ def process_button(button_state):
                 else:
                     action = 'turn_off'
                 if button_position == lights_loft_lamp:
-                    ha_api_request('light', HA_LOFT_LAMP_ENTITY, button_position, action)
+                    ha_api_request('light', HA_LOFT_LAMP_ENTITY, action)
+                    set_led_green(button_position)
                 elif button_position == lights_loft_stairs:
-                    ha_api_request('light', HA_LOFT_STAIRS_ENTITY, button_position, action)
+                    ha_api_request('light', HA_LOFT_STAIRS_ENTITY, action)
+                    set_led_green(button_position)
                 elif button_position == lights_loft_fan:
-                    ha_api_request('light', HA_LOFT_CEILING_ENTITY, button_position, action)
+                    ha_api_request('light', HA_LOFT_CEILING_ENTITY, action)
+                    set_led_green(button_position)
                 elif button_position == lights_loft_desk:
-                    ha_api_request('light', HA_LOFT_DESK_ENTITY, button_position, action)
+                    ha_api_request('light', HA_LOFT_DESK_ENTITY, action)
+                    set_led_green(button_position)
                 elif button_position == loft_ceiling_fan:
-                    ha_api_request('fan', HA_LOFT_FAN_ENTITY, button_position, action)
+                    ha_api_request('fan', HA_LOFT_FAN_ENTITY, action)
+                    set_led_green(button_position)
                 set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
 
             # Streams
@@ -599,13 +613,14 @@ def process_button(button_state):
             if button_position == garage_light:
                 if not garage_safety_on:
                     kasa_device_state[button_position]['state'] = not kasa_device_state[button_position]['state']
-                    ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY, button_position)
-                    ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY, button_position)
-                    ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY, button_position)
+                    ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY)
+                    ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY)
+                    ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY)
                     set_led_green(button_position) if kasa_device_state[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
-                    ha_api_request('cover', HA_GARAGE_DOOR_ENTITY, button_position)
+                    ha_api_request('cover', HA_GARAGE_DOOR_ENTITY)
+                    set_led_green(button_position)
 
             # Onvif
             if button_position in camera_buttons:
@@ -639,6 +654,8 @@ def process_button(button_state):
 
 initialize()
 schedule.every().day.at("05:40").do(init_stream_process)
+
+poll_ha_entity_state(HA_LOFT_DESK_ENTITY)
 
 while 1:
     try:
