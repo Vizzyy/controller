@@ -332,24 +332,27 @@ def office_light_request(mode, button_position):
 
 
 def ha_api_request(mode, entity, action='toggle'):
-    r = requests.post(f'http://{HA_HOST}/api/services/{mode}/{action}',
-    headers={
-        'Authorization': f'Bearer {HA_API_KEY}',
-        'content-type': 'application/json'
-    },
-    json = {
-        'entity_id': f'{entity}'
-    })
-    print(f'ha_api_request: {mode} - text: {r.text} - action: {action} - status_code: {r.status_code}')
+    try:
+        r = requests.post(f'http://{HA_HOST}/api/services/{mode}/{action}',
+        headers={
+            'Authorization': f'Bearer {HA_API_KEY}',
+            'content-type': 'application/json'
+        },
+        json = {
+            'entity_id': f'{entity}'
+        })
+        print(f'ha_api_request: {mode} - text: {r.text} - action: {action} - status_code: {r.status_code}')
+    except Exception as e:
+        print(f'Error during ha_api_request: {type(e).__name__} - {e}')
 
 
 def poll_ha_entity_state(entity):
-    r = requests.get(f'http://{HA_HOST}/api/states/{entity}',
-    headers={
-        'Authorization': f'Bearer {HA_API_KEY}',
-        'content-type': 'application/json'
-    })
     try:
+        r = requests.get(f'http://{HA_HOST}/api/states/{entity}',
+        headers={
+            'Authorization': f'Bearer {HA_API_KEY}',
+            'content-type': 'application/json'
+        })
         response = json.loads(r.text)
         state = response.get('state')
         print(f'poll_ha_entity_state: {entity} - state: {state} - status_code: {r.status_code}')
