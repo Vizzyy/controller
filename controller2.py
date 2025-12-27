@@ -617,25 +617,21 @@ def process_button(button_state):
                     print(f'Garage Safety DISARMED!')
                     garage_safety_on = False
                     set_led_yellow(garage_safety)
-                    set_led_green(garage_light)
-                    set_led_green(garage_door)
                 else:
                     print(f'Garage Safety ARMED!')
                     garage_safety_on = True
                     set_led_red(garage_safety)
-                    set_led_yellow(garage_light)
-                    set_led_yellow(garage_door)
             if button_position == garage_light:
-                if not garage_safety_on:
-                    entity_states[button_position]['state'] = not entity_states[button_position]['state']
-                    ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY)
-                    ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY)
-                    ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY)
-                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
+                entity_states[button_position]['state'] = not entity_states[button_position]['state']
+                ha_api_request('light', HA_GARAGE_LIGHT_1_ENTITY)
+                ha_api_request('light', HA_GARAGE_LIGHT_2_ENTITY)
+                ha_api_request('light', HA_GARAGE_LIGHT_3_ENTITY)
+                set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
             if button_position == garage_door:
                 if not garage_safety_on:
+                    entity_states[button_position]['state'] = not entity_states[button_position]['state']
                     ha_api_request('cover', HA_GARAGE_DOOR_ENTITY)
-                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
+                set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
             # Schlage Locks
             if button_position == lock_arm:
