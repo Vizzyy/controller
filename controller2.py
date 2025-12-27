@@ -643,14 +643,10 @@ def process_button(button_state):
                     print(f'Lock Safety DISARMED!')
                     lock_safety_on = False
                     set_led_yellow(lock_arm)
-                    set_led_green(lock_front)
-                    set_led_green(lock_back)
                 else:
                     print(f'Lock Safety ARMED!')
                     lock_safety_on = True
                     set_led_red(lock_arm)
-                    set_led_yellow(lock_front)
-                    set_led_yellow(lock_back)
             if button_position == lock_front:
                 if not lock_safety_on:
                     entity_states[button_position]['state'] = not entity_states[button_position]['state']
