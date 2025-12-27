@@ -20,6 +20,7 @@ appliance = None
 # pihole_enabled = True
 WAIT_TIME = .1
 garage_safety_on = True
+lock_safety_on = True
 browser_process = None
 default_stream = 8 # 8 = external medley
 camera_selected = default_stream
@@ -52,6 +53,11 @@ lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp,
                   lights_loft_stairs, lights_loft_desk, lights_loft_fan]
 
 loft_ceiling_fan = 35
+
+lock_front = 37
+lock_back = 38
+lock_arm = 39
+lock_buttons = [lock_front, lock_back, lock_arm]
 
 stream_1 = 64
 stream_2 = 65
@@ -89,7 +95,7 @@ audio_disable = 119
 audio_buttons = [audio_enable, audio_disable]
 enabled_buttons = lights_buttons + stream_buttons + garage_buttons + [loft_ceiling_fan] + \
                   camera_buttons + stream_reset_button + display_sleep_button + bluetooth_button + \
-                  volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button
+                  volume_buttons + audio_buttons + launchpad_sleep + stream_refresh_button + lock_buttons
 
 entity_states = {
     lights_loft_lamp: {
@@ -133,6 +139,18 @@ entity_states = {
         'state': False,
         'entity': HA_GARAGE_DOOR_ENTITY,
         'mode': 'cover'
+    },
+    lock_front: {
+        'alias': 'Front Lock',
+        'state': False,
+        'entity': HA_FRONT_LOCK_ENTITY,
+        'mode': 'input_boolean'
+    },
+    lock_back: {
+        'alias': 'Back Lock',
+        'state': False,
+        'entity': HA_BACK_LOCK_ENTITY,
+        'mode': 'input_boolean'
     }
 }
 
@@ -294,6 +312,9 @@ def set_default_led_states():
     set_led_yellow(launchpad_sleep[0])
     set_led_red(camera_w_led)
     set_led_yellow(camera_home_reset)
+    set_led_yellow(lock_back)
+    set_led_yellow(lock_front)
+    set_led_red(lock_arm)
 
 
 def initialize():
@@ -615,6 +636,31 @@ def process_button(button_state):
                 if not garage_safety_on:
                     ha_api_request('cover', HA_GARAGE_DOOR_ENTITY)
                     set_led_green(button_position)
+
+            # Schlage Locks
+            if button_position == lock_arm:
+                if lock_safety_on:
+                    print(f'Lock Safety DISARMED!')
+                    lock_safety_on = False
+                    set_led_yellow(lock_arm)
+                    set_led_green(lock_front)
+                    set_led_green(lock_back)
+                else:
+                    print(f'Lock Safety ARMED!')
+                    lock_safety_on = True
+                    set_led_red(lock_arm)
+                    set_led_yellow(lock_front)
+                    set_led_yellow(lock_back)
+            if button_position == lock_front:
+                if not lock_arm:
+                    entity_states[button_position]['state'] = not entity_states[button_position]['state']
+                    ha_api_request('input_boolean', HA_FRONT_LOCK_ENTITY)
+                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
+            if button_position == lock_back:
+                if not lock_arm:
+                    ha_api_request('input_boolean', HA_BACK_LOCK_ENTITY)
+                    set_led_green(button_position)
+
 
             # Onvif
             if button_position in camera_buttons:
