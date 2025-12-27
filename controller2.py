@@ -536,7 +536,7 @@ def handle_ptz_api_req(button_position, push_state):
 
 
 def process_button(button_state):
-    global garage_safety_on, camera_selected, brightness_setting
+    global garage_safety_on, camera_selected, brightness_setting, lock_safety_on
     button_position = button_state[0]
     push_state = button_state[1]
 
