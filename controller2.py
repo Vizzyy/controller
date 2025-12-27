@@ -635,7 +635,7 @@ def process_button(button_state):
             if button_position == garage_door:
                 if not garage_safety_on:
                     ha_api_request('cover', HA_GARAGE_DOOR_ENTITY)
-                    set_led_green(button_position)
+                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
             # Schlage Locks
             if button_position == lock_arm:
@@ -652,14 +652,14 @@ def process_button(button_state):
                     set_led_yellow(lock_front)
                     set_led_yellow(lock_back)
             if button_position == lock_front:
-                if not lock_arm:
+                if not lock_safety_on:
                     entity_states[button_position]['state'] = not entity_states[button_position]['state']
                     ha_api_request('input_boolean', HA_FRONT_LOCK_ENTITY)
                     set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
             if button_position == lock_back:
-                if not lock_arm:
+                if not lock_safety_on:
                     ha_api_request('input_boolean', HA_BACK_LOCK_ENTITY)
-                    set_led_green(button_position)
+                    set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
 
             # Onvif
