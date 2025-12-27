@@ -654,6 +654,7 @@ def process_button(button_state):
                 set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
             if button_position == lock_back:
                 if not lock_safety_on:
+                    entity_states[button_position]['state'] = not entity_states[button_position]['state']
                     ha_api_request('input_boolean', HA_BACK_LOCK_ENTITY)
                 set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
