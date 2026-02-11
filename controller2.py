@@ -47,10 +47,11 @@ lights_white = 1
 lights_rainbow = 2
 lights_loft_lamp = 17
 lights_loft_stairs = 18
+lights_network_bulb = 19
 lights_loft_desk = 33
 lights_loft_fan = 34
 lights_buttons = [lights_off, lights_white, lights_rainbow, lights_loft_lamp, 
-                  lights_loft_stairs, lights_loft_desk, lights_loft_fan]
+                  lights_loft_stairs, lights_network_bulb, lights_loft_desk, lights_loft_fan]
 
 loft_ceiling_fan = 35
 
@@ -108,6 +109,12 @@ entity_states = {
         'alias': 'Loft Stairs',
         'state': True,
         'entity': HA_LOFT_STAIRS_ENTITY,
+        'mode': 'light'
+    },
+    lights_network_bulb: {
+        'alias': 'Network Bulb',
+        'state': False,
+        'entity': 'light.network_bulb',
         'mode': 'light'
     },
     garage_light: {
@@ -315,6 +322,7 @@ def set_default_led_states():
     set_led_yellow(lock_back)
     set_led_yellow(lock_front)
     set_led_red(lock_arm)
+    set_led_yellow(lights_network_bulb)
 
 
 def initialize():
@@ -556,7 +564,7 @@ def process_button(button_state):
                 office_light_request('white', button_position)
             if button_position == lights_rainbow:
                 office_light_request('rainbowCycle', button_position)
-            if button_position in [lights_loft_lamp, lights_loft_stairs, lights_loft_fan, lights_loft_desk, loft_ceiling_fan]:
+            if button_position in [lights_loft_lamp, lights_loft_stairs, lights_loft_fan, lights_loft_desk, loft_ceiling_fan, lights_network_bulb]:
                 entity_states[button_position]['state'] = not entity_states[button_position]['state']
                 if entity_states[button_position]['state']:
                     action = 'turn_on'
@@ -576,6 +584,9 @@ def process_button(button_state):
                     set_led_green(button_position)
                 elif button_position == loft_ceiling_fan:
                     ha_api_request('fan', HA_LOFT_FAN_ENTITY, action)
+                    set_led_green(button_position)
+                elif button_position == lights_network_bulb:
+                    ha_api_request('light', entity_states[lights_network_bulb]["entity"], action)
                     set_led_green(button_position)
                 set_led_green(button_position) if entity_states[button_position]['state'] else set_led_yellow(button_position)
 
