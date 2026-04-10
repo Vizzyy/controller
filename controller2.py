@@ -179,11 +179,12 @@ def init_stream_process():
     if browser_process:
         browser_process.kill()
 
+    cam = 'file:///home/pi/controller/cam.html?id='
     cmd = f'killall chromium; DISPLAY=:0 chromium --kiosk --incognito --start-maximized ' \
           f'--enable-gpu-rasterization --enable-features=VaapiVideoDecoder ' \
           f'--noerrdialogs --disable-infobars --password-store=basic ' \
-          f'{STREAM_BASE}/1/stream {STREAM_BASE}/2/stream {STREAM_BASE}/3/stream {STREAM_BASE}/4/stream ' \
-          f'{STREAM_BASE}/5/stream {STREAM_BASE}/6/stream {STREAM_BASE}/7/stream {STREAM_MEDLEY} {STREAM_BASE}/9/stream'
+          f'{cam}1 {cam}2 {cam}3 {cam}4 ' \
+          f'{cam}5 {cam}6 {cam}7 {STREAM_MEDLEY} {cam}9'
     print(f'init_stream_process: {cmd}')
 
     try:

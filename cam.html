@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; }
+  html, body { width:100%; height:100%; background:#000; overflow:hidden; }
+  img { width:100%; height:100%; object-fit:contain; }
+</style>
+</head><body>
+<img id="s">
+<script>
+  const p = new URLSearchParams(location.search);
+  const id = p.get('id') || '1';
+  const host = p.get('host') || 'kodai';
+  const port = p.get('port') || '8081';
+  document.getElementById('s').src = 'http://' + host + ':' + port + '/' + id + '/stream';
+  document.title = 'Camera ' + id;
+</script>
+</body></html>
